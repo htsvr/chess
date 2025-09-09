@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -100,6 +101,8 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        HashSet<ChessMove> moves = new HashSet<ChessMove>();
+        moves.add(new ChessMove(myPosition, new ChessPosition(3, 4), null));
+        return moves;
     }
 }

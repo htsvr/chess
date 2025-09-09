@@ -80,15 +80,19 @@ public class ChessBoard {
 
         ChessBoard that = (ChessBoard) o;
 //        return Arrays.deepEquals(board, that.board);
-        boolean arraysAreSame = true;
         for(int r = 0; r < board.length; r++){
             for (int c = 0; c < board.length; c++) {
-                if (board[r][c] != that.board[r][c]){
-                    arraysAreSame = false;
+                if(board[r][c] == null){
+                    if (that.board[r][c] != null){
+                        return false;
+                    }
+                }
+                else if (!(board[r][c].equals(that.board[r][c]))){
+                    return false;
                 }
             }
         }
-        return arraysAreSame;
+        return true;
     }
 
     @Override
