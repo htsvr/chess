@@ -106,22 +106,11 @@ public class ChessPiece {
                 return getRookMoves(board, myPosition);
             case PieceType.BISHOP:
                 return getBishopMoves(board, myPosition);
+            case PieceType.QUEEN:
+                return getQueenMoves(board, myPosition);
             default:
                 return null;
         }
-    }
-
-    public Collection<ChessMove> getRookMoves(ChessBoard board, ChessPosition myPosition) {
-        HashSet<ChessMove> moves = new HashSet<ChessMove>();
-        ChessPosition pos = myPosition;
-        int[][] options = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-        for (int[] a: options){
-            pos = myPosition;
-            do {
-                pos = new ChessPosition(pos.getRow()+a[0], pos.getColumn()+a[1]);
-            } while (addMove(board, myPosition, pos, moves));
-        }
-        return moves;
     }
 
     public boolean addMove(ChessBoard board, ChessPosition myPosition, ChessPosition movePosition, Collection<ChessMove> moves){
@@ -140,6 +129,19 @@ public class ChessPiece {
         }
     }
 
+    public Collection<ChessMove> getRookMoves(ChessBoard board, ChessPosition myPosition) {
+        HashSet<ChessMove> moves = new HashSet<ChessMove>();
+        ChessPosition pos = myPosition;
+        int[][] options = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for (int[] a: options){
+            pos = myPosition;
+            do {
+                pos = new ChessPosition(pos.getRow()+a[0], pos.getColumn()+a[1]);
+            } while (addMove(board, myPosition, pos, moves));
+        }
+        return moves;
+    }
+
     public Collection<ChessMove> getBishopMoves(ChessBoard board, ChessPosition myPosition) {
         HashSet<ChessMove> moves = new HashSet<ChessMove>();
         ChessPosition pos = myPosition;
@@ -150,6 +152,12 @@ public class ChessPiece {
                 pos = new ChessPosition(pos.getRow()+a[0], pos.getColumn()+a[1]);
             } while (addMove(board, myPosition, pos, moves));
         }
+        return moves;
+    }
+
+    public Collection<ChessMove> getQueenMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = getBishopMoves(board, myPosition);
+        moves.addAll(getRookMoves(board, myPosition));
         return moves;
     }
 }
