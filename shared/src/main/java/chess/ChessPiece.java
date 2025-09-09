@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -32,28 +33,48 @@ public class ChessPiece {
 
     @Override
     public String toString() {
-        return "ChessPiece{" +
-                "color=" + color +
-                ", type=" + type +
-                '}';
+        String result = "";
+        switch (type) {
+            case ChessPiece.PieceType.BISHOP:
+                result = "b";
+                break;
+            case ChessPiece.PieceType.KING:
+                result = "k";
+                break;
+            case ChessPiece.PieceType.KNIGHT:
+                result = "n";
+                break;
+            case ChessPiece.PieceType.PAWN:
+                result = "p";
+                break;
+            case ChessPiece.PieceType.QUEEN:
+                result = "q";
+                break;
+            case ChessPiece.PieceType.ROOK:
+                result = "r";
+                break;
+            default:
+        }
+        if (color == ChessGame.TeamColor.WHITE){
+            result = result.toUpperCase();
+        }
+        return result;
     }
 
-    public boolean equals(Object object) {
-        if (object == null || getClass() != object.getClass()) {
-            return false;
-        }
-        if (!super.equals(object)) {
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
-        ChessPiece that = (ChessPiece) object;
-        return color == that.getTeamColor() && type == that.getPieceType();
+        ChessPiece that = (ChessPiece) o;
+        return color == that.color && type == that.type;
     }
 
+    @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + java.util.Objects.hashCode(color);
-        result = 31 * result + java.util.Objects.hashCode(type);
+        int result = Objects.hashCode(color);
+        result = 31 * result + Objects.hashCode(type);
         return result;
     }
 

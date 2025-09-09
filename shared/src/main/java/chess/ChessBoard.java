@@ -54,7 +54,16 @@ public class ChessBoard {
         }
 
         ChessBoard that = (ChessBoard) o;
-        return Arrays.deepEquals(board, that.board);
+//        return Arrays.deepEquals(board, that.board);
+        boolean arraysAreSame = true;
+        for(int r = 0; r < board.length; r++){
+            for (int c = 0; c < board.length; c++) {
+                if (board[r][c] != that.board[r][c]){
+                    arraysAreSame = false;
+                }
+            }
+        }
+        return arraysAreSame;
     }
 
     @Override
@@ -64,8 +73,19 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        return "ChessBoard{" +
-                "board=" + Arrays.toString(board) +
-                '}';
+        String result = "";
+        for (int r = 0; r < 8; r++){
+            result += "|";
+            for (int c = 0; c < 8; c++) {
+                var piece = getPiece(new ChessPosition(r + 1, c + 1));
+                if (piece == null){
+                    result += " |";
+                } else {
+                    result += piece.toString() + "|";
+                }
+            }
+            result += "\n";
+        }
+        return result;
     }
 }
