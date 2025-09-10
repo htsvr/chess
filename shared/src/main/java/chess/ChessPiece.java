@@ -102,20 +102,13 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         switch (type) {
-            case PieceType.ROOK:
-                return getRookMoves(board, myPosition);
-            case PieceType.BISHOP:
-                return getBishopMoves(board, myPosition);
-            case PieceType.QUEEN:
-                return getQueenMoves(board, myPosition);
-            case PieceType.PAWN:
-                return getPawnMoves(board, myPosition);
-            case PieceType.KING:
-                return getKingMoves(board, myPosition);
-            case PieceType.KNIGHT:
-                return getKnightMoves(board, myPosition);
-            default:
-                return null;
+            case PieceType.ROOK -> {return getRookMoves(board, myPosition);}
+            case PieceType.BISHOP -> {return getBishopMoves(board, myPosition);}
+            case PieceType.QUEEN -> {return getQueenMoves(board, myPosition);}
+            case PieceType.PAWN -> {return getPawnMoves(board, myPosition);}
+            case PieceType.KING -> {return getKingMoves(board, myPosition);}
+            case PieceType.KNIGHT -> {return getKnightMoves(board, myPosition);}
+            default -> {return null;}
         }
     }
 
@@ -136,8 +129,8 @@ public class ChessPiece {
     }
 
     public Collection<ChessMove> getRookMoves(ChessBoard board, ChessPosition myPosition) {
-        HashSet<ChessMove> moves = new HashSet<ChessMove>();
-        ChessPosition pos = myPosition;
+        HashSet<ChessMove> moves = new HashSet<>();
+        ChessPosition pos;
         int[][] options = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         for (int[] a: options){
             pos = myPosition;
@@ -149,8 +142,8 @@ public class ChessPiece {
     }
 
     public Collection<ChessMove> getBishopMoves(ChessBoard board, ChessPosition myPosition) {
-        HashSet<ChessMove> moves = new HashSet<ChessMove>();
-        ChessPosition pos = myPosition;
+        HashSet<ChessMove> moves = new HashSet<>();
+        ChessPosition pos;
         int[][] options = {{-1, 1}, {-1, -1}, {1, -1}, {1, 1}};
         for (int[] a: options){
             pos = myPosition;
@@ -181,7 +174,7 @@ public class ChessPiece {
     }
 
     public Collection<ChessMove> getPawnMoves(ChessBoard board, ChessPosition myPosition) {
-        HashSet<ChessMove> moves = new HashSet<ChessMove>();
+        HashSet<ChessMove> moves = new HashSet<>();
         int dir = color == ChessGame.TeamColor.WHITE ? 1 : -1;
         ChessPosition pos = new ChessPosition(myPosition.getRow() + dir, myPosition.getColumn());
         if(pos.inBounds(8) && board.getPiece(pos) == null){
@@ -205,8 +198,8 @@ public class ChessPiece {
     }
 
     public Collection<ChessMove> getKingMoves(ChessBoard board, ChessPosition myPosition) {
-        HashSet<ChessMove> moves = new HashSet<ChessMove>();
-        ChessPosition pos = myPosition;
+        HashSet<ChessMove> moves = new HashSet<>();
+        ChessPosition pos;
         int[][] options = {{-1, 1}, {-1, -1}, {1, -1}, {1, 1}, {0, 1}, {0, -1}, {-1, 0}, {1, 0}};
         for (int[] a: options){
             pos = new ChessPosition(myPosition.getRow()+a[0], myPosition.getColumn()+a[1]);
@@ -216,8 +209,8 @@ public class ChessPiece {
     }
 
     public Collection<ChessMove> getKnightMoves(ChessBoard board, ChessPosition myPosition) {
-        HashSet<ChessMove> moves = new HashSet<ChessMove>();
-        ChessPosition pos = myPosition;
+        HashSet<ChessMove> moves = new HashSet<>();
+        ChessPosition pos;
         int[][] options = {{2, 1}, {1, 2}, {-1, 2}, {-2, 1}, {1, -2}, {2, -1}, {-2, -1}, {-1, -2}};
         for (int[] a: options){
             pos = new ChessPosition(myPosition.getRow()+a[0], myPosition.getColumn()+a[1]);
