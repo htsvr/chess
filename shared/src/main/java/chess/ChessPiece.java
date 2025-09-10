@@ -108,13 +108,15 @@ public class ChessPiece {
                 return getBishopMoves(board, myPosition);
             case PieceType.QUEEN:
                 return getQueenMoves(board, myPosition);
+            case PieceType.PAWN:
+                return getPawnMoves(board, myPosition);
             default:
                 return null;
         }
     }
 
     public boolean addMove(ChessBoard board, ChessPosition myPosition, ChessPosition movePosition, Collection<ChessMove> moves){
-        if(! (1 <= movePosition.getRow() && movePosition.getRow() <= 8 && 1 <= movePosition.getColumn() && movePosition.getColumn() <= 8)){
+        if(!movePosition.inBounds(8)){
             return false;
         }
         ChessPiece piece = board.getPiece(movePosition);
@@ -158,6 +160,24 @@ public class ChessPiece {
     public Collection<ChessMove> getQueenMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = getBishopMoves(board, myPosition);
         moves.addAll(getRookMoves(board, myPosition));
+        return moves;
+    }
+
+    public Collection<ChessMove> getPawnMoves(ChessBoard board, ChessPosition myPosition) {
+        HashSet<ChessMove> moves = new HashSet<ChessMove>();
+        int dir = color == ChessGame.TeamColor.WHITE ? 1 : -1;
+        ChessPosition pos = new ChessPosition(myPosition.getRow() + dir, myPosition.getColumn());
+        if(pos.inBounds(8) && board.getPiece(pos) == null){
+            moves.add(new ChessMove(myPosition, pos, null));
+        }
+        pos = new ChessPosition(myPosition.getRow()+dir, myPosition.getColumn()+1);
+        if(pos.inBounds(8) && board.getPiece(pos) != null && board.getPiece(pos).getTeamColor() != color){
+            moves.add(new ChessMove(myPosition, pos, null));
+        }
+        pos = new ChessPosition(myPosition.getRow()+dir, myPosition.getColumn()-1);
+        if(pos.inBounds(8) && board.getPiece(pos) != null && board.getPiece(pos).getTeamColor() != color){
+            moves.add(new ChessMove(myPosition, pos, null));
+        }
         return moves;
     }
 }
