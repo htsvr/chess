@@ -112,6 +112,8 @@ public class ChessPiece {
                 return getPawnMoves(board, myPosition);
             case PieceType.KING:
                 return getKingMoves(board, myPosition);
+            case PieceType.KNIGHT:
+                return getKnightMoves(board, myPosition);
             default:
                 return null;
         }
@@ -206,6 +208,17 @@ public class ChessPiece {
         HashSet<ChessMove> moves = new HashSet<ChessMove>();
         ChessPosition pos = myPosition;
         int[][] options = {{-1, 1}, {-1, -1}, {1, -1}, {1, 1}, {0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+        for (int[] a: options){
+            pos = new ChessPosition(myPosition.getRow()+a[0], myPosition.getColumn()+a[1]);
+            addMove(board, myPosition, pos, moves);
+        }
+        return moves;
+    }
+
+    public Collection<ChessMove> getKnightMoves(ChessBoard board, ChessPosition myPosition) {
+        HashSet<ChessMove> moves = new HashSet<ChessMove>();
+        ChessPosition pos = myPosition;
+        int[][] options = {{2, 1}, {1, 2}, {-1, 2}, {-2, 1}, {1, -2}, {2, -1}, {-2, -1}, {-1, -2}};
         for (int[] a: options){
             pos = new ChessPosition(myPosition.getRow()+a[0], myPosition.getColumn()+a[1]);
             addMove(board, myPosition, pos, moves);
