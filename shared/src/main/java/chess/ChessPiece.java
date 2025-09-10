@@ -110,6 +110,8 @@ public class ChessPiece {
                 return getQueenMoves(board, myPosition);
             case PieceType.PAWN:
                 return getPawnMoves(board, myPosition);
+            case PieceType.KING:
+                return getKingMoves(board, myPosition);
             default:
                 return null;
         }
@@ -163,20 +165,50 @@ public class ChessPiece {
         return moves;
     }
 
+    public void pawnAdd(ChessPosition myPosition, ChessPosition movePosition, Collection<ChessMove> moves){
+        if(movePosition.getRow() == 1 || movePosition.getRow() == 8){
+            for (var promotionPiece : PieceType.values()){
+                if(promotionPiece != PieceType.PAWN && promotionPiece != PieceType.KING) {
+                    moves.add(new ChessMove(myPosition, movePosition, promotionPiece));
+                }
+            }
+        }
+        else {
+            moves.add(new ChessMove(myPosition, movePosition, null));
+        }
+    }
+
     public Collection<ChessMove> getPawnMoves(ChessBoard board, ChessPosition myPosition) {
         HashSet<ChessMove> moves = new HashSet<ChessMove>();
         int dir = color == ChessGame.TeamColor.WHITE ? 1 : -1;
         ChessPosition pos = new ChessPosition(myPosition.getRow() + dir, myPosition.getColumn());
         if(pos.inBounds(8) && board.getPiece(pos) == null){
-            moves.add(new ChessMove(myPosition, pos, null));
+            pawnAdd(myPosition, pos, moves);
+            if (myPosition.getRow() == (dir == 1? 2 : 7)){
+                pos = new ChessPosition(myPosition.getRow() + dir*2, myPosition.getColumn());
+                if(pos.inBounds(8) && board.getPiece(pos) == null) {
+                    pawnAdd(myPosition, pos, moves);
+                }
+            }
         }
         pos = new ChessPosition(myPosition.getRow()+dir, myPosition.getColumn()+1);
         if(pos.inBounds(8) && board.getPiece(pos) != null && board.getPiece(pos).getTeamColor() != color){
-            moves.add(new ChessMove(myPosition, pos, null));
+            pawnAdd(myPosition, pos, moves);
         }
         pos = new ChessPosition(myPosition.getRow()+dir, myPosition.getColumn()-1);
         if(pos.inBounds(8) && board.getPiece(pos) != null && board.getPiece(pos).getTeamColor() != color){
-            moves.add(new ChessMove(myPosition, pos, null));
+            pawnAdd(myPosition, pos, moves);
+        }
+        return moves;
+    }
+
+    public Collection<ChessMove> getKingMoves(ChessBoard board, ChessPosition myPosition) {
+        HashSet<ChessMove> moves = new HashSet<ChessMove>();
+        ChessPosition pos = myPosition;
+        int[][] options = {{-1, 1}, {-1, -1}, {1, -1}, {1, 1}, {0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+        for (int[] a: options){
+            pos = new ChessPosition(myPosition.getRow()+a[0], myPosition.getColumn()+a[1]);
+            addMove(board, myPosition, pos, moves);
         }
         return moves;
     }
