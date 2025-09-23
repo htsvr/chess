@@ -56,11 +56,7 @@ public class ChessGame {
             Collection<ChessMove> all_moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
             Collection<ChessMove> valid_moves = new HashSet<>();
             for(ChessMove move:all_moves) {
-                ChessBoard boardAfterMove = board.copy();
-                if(boardAfterMove.movePiece(move)) {
-                    if (wouldBeInCheck(boardAfterMove, board.getPiece(startPosition).getTeamColor())) {
-                        continue;
-                    }
+                if(!wouldBeInCheckAfterMove(board.getPiece(startPosition).getTeamColor(), move)){
                     valid_moves.add(move);
                 }
             }
@@ -134,13 +130,37 @@ public class ChessGame {
     }
 
     /**
+     *
+     * @param teamColor team to check for check
+     * @param move move to perform before check
+     * @return true if the team would be in check after the move
+     */
+    public boolean wouldBeInCheckAfterMove(TeamColor teamColor, ChessMove move){
+    ChessBoard boardAfterMove = board.copy();
+    boardAfterMove.movePiece(move);
+    return(wouldBeInCheck(boardAfterMove, teamColor));
+}
+
+    /**
      * Determines if the given team is in checkmate
      *
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if(isInCheck(teamColor)){
+            for(ChessPosition pos:getChessPositions(board)) {
+                if(board.getPiece(pos).getTeamColor() == turnColor) {
+                    for (ChessMove move : validMoves(pos)){
+                        if(!wouldBeInCheckAfterMove(teamColor, move)){
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -151,7 +171,17 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if(!isInCheck(teamColor)){
+            for (ChessPosition pos:getChessPositions(board)){
+                if(board.getPiece(pos).getTeamColor() == teamColor){
+                    if(!validMoves(pos).isEmpty()){
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
