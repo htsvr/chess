@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -9,16 +10,20 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
+    private final ChessBoard board = new ChessBoard();
+    private TeamColor turnColor;
 
     public ChessGame() {
-
+        // set up new chess board at set it to white's turn
+        board.resetBoard();
+        turnColor = TeamColor.WHITE;
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return turnColor;
     }
 
     /**
@@ -27,7 +32,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        turnColor = team;
     }
 
     /**
@@ -106,5 +111,22 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ChessGame chessGame = (ChessGame) o;
+        return board.equals(chessGame.board) && turnColor == chessGame.turnColor;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = board.hashCode();
+        result = 31 * result + Objects.hashCode(turnColor);
+        return result;
     }
 }
