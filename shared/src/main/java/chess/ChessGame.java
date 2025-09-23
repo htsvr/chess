@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessGame {
-    private final ChessBoard board = new ChessBoard();
+    private ChessBoard board = new ChessBoard();
     private TeamColor turnColor;
 
     public ChessGame() {
@@ -51,7 +52,11 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        if(board.getPiece(startPosition) != null && board.getPiece(startPosition).getTeamColor() == turnColor) { //Check if space is a piece of the right color
+            return board.getPiece(startPosition).pieceMoves(board, startPosition);
+        } else {
+            return new HashSet<>();
+        }
     }
 
     /**
@@ -101,7 +106,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = board.copy();
     }
 
     /**
@@ -110,7 +115,7 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return board;
     }
 
     @Override

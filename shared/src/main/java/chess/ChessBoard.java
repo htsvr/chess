@@ -117,4 +117,17 @@ public class ChessBoard {
         }
         return result;
     }
+
+    public ChessBoard copy() {
+        ChessBoard boardCopy = new ChessBoard();
+        for (int r = 1; r < 9; r ++){
+            for (int c = 1; c < 9; c ++) {
+                ChessPosition pos = new ChessPosition(r, c);
+                if(getPiece(pos) != null) {
+                    boardCopy.addPiece(pos, new ChessPiece(getPiece(pos).getTeamColor(), getPiece(pos).getPieceType()));
+                }
+            }
+        }
+        return boardCopy;
+    }
 }
