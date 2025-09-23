@@ -53,7 +53,8 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         if(board.getPiece(startPosition) != null && board.getPiece(startPosition).getTeamColor() == turnColor) { //Check if space is a piece of the right color
-            return board.getPiece(startPosition).pieceMoves(board, startPosition);
+            Collection<ChessMove> moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
+            return moves;
         } else {
             return new HashSet<>();
         }
@@ -76,7 +77,52 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPos = null;
+        for(ChessPosition pos:getChessPositions(board)){
+            if(board.getPiece(pos).getPieceType() == ChessPiece.PieceType.KING && board.getPiece(pos).getTeamColor() == teamColor){
+                kingPos = pos;
+            }
+        }
+        return wouldBeInCheck(board, teamColor, kingPos);
+    }
+
+    /**
+     * 
+     * @param boardToCheck the board to look through
+     * @return a collection of every ChessPosition with a ChessPiece in it
+     */
+    private static Collection<ChessPosition> getChessPositions(ChessBoard boardToCheck){
+        Collection<ChessPosition> positions = new HashSet<>();
+        for(int row = 1; row < 9; row ++) {
+            for (int col = 1; col < 9; col++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                if(boardToCheck.getPiece(pos) != null) {
+                    positions.add(pos);
+                }
+            }
+        }
+        return positions;
+    }
+
+    /**
+     *
+     * @param boardToCheck ChessBoard that should be searched to see if the king is in check
+     * @param teamColor which team to check for check
+     * @param kingPos position of the king to be checked for check
+     * @return True if the specified team is in check on the board provided
+     */
+    private static boolean wouldBeInCheck(ChessBoard boardToCheck, TeamColor teamColor, ChessPosition kingPos) {
+        for(ChessPosition pos:getChessPositions(boardToCheck)){
+            if(boardToCheck.getPiece(pos).getTeamColor() != teamColor) { //check if piece exists and is on the other team
+                Collection<ChessMove> moves = boardToCheck.getPiece(pos).pieceMoves(boardToCheck, pos);
+                for (ChessMove move:moves) {
+                    if(move.getEndPosition() == kingPos){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
