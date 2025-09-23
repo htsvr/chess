@@ -52,13 +52,13 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        if(board.getPiece(startPosition) != null && board.getPiece(startPosition).getTeamColor() == turnColor) { //Check if space is a piece of the right color
+        if(board.getPiece(startPosition) != null) { //Check if space is a piece
             Collection<ChessMove> all_moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
             Collection<ChessMove> valid_moves = new HashSet<>();
             for(ChessMove move:all_moves) {
                 ChessBoard boardAfterMove = board.copy();
                 if(boardAfterMove.movePiece(move)) {
-                    if (wouldBeInCheck(boardAfterMove, turnColor)) {
+                    if (wouldBeInCheck(boardAfterMove, board.getPiece(startPosition).getTeamColor())) {
                         continue;
                     }
                     valid_moves.add(move);
@@ -77,7 +77,12 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        if(board.getPiece(move.getStartPosition()) != null && board.getPiece(move.getStartPosition()).getTeamColor() == turnColor && validMoves(move.getStartPosition()).contains(move)){
+            board.movePiece(move);
+            turnColor = turnColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        } else {
+            throw new InvalidMoveException();
+        }
     }
 
     /**

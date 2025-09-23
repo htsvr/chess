@@ -135,8 +135,12 @@ public class ChessBoard {
         if(getPiece(move.getStartPosition()) == null) {
             return false;
         }
-        addPiece(move.getEndPosition(), getPiece(move.getStartPosition()));
-        board[move.getStartPosition().getRow()-1][move.getStartPosition().getColumn()-1] = null;
+        if(move.getPromotionPiece() == null) {
+            addPiece(move.getEndPosition(), getPiece(move.getStartPosition()));
+        } else {
+            addPiece(move.getEndPosition(), new ChessPiece(getPiece(move.getStartPosition()).getTeamColor(), move.getPromotionPiece()));
+        }
+        board[move.getStartPosition().getRow() - 1][move.getStartPosition().getColumn() - 1] = null;
         return true;
     }
 }
