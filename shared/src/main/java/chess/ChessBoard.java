@@ -130,4 +130,13 @@ public class ChessBoard {
         }
         return boardCopy;
     }
+
+    public boolean movePiece(ChessMove move) {
+        if(getPiece(move.getStartPosition()) == null) {
+            return false;
+        }
+        addPiece(move.getEndPosition(), getPiece(move.getStartPosition()));
+        board[move.getStartPosition().getRow()-1][move.getStartPosition().getColumn()-1] = null;
+        return true;
+    }
 }
