@@ -60,10 +60,63 @@ public class ChessGame {
                     valid_moves.add(move);
                 }
             }
+            if(board.getPiece(startPosition).getPieceType() == ChessPiece.PieceType.KING){
+                valid_moves.addAll(getValidCastleMoves(startPosition));
+            } else if(board.getPiece(startPosition).getPieceType() == ChessPiece.PieceType.PAWN){
+                //valid_moves.add(checkIfCanEnPasant(startPosition));
+            }
             return valid_moves;
         } else {
             return new HashSet<>();
         }
+    }
+
+    /**
+     *
+     * @param startPosition position of the piece to check for valid castle moves
+     * @return collection of valid castling moves
+     */
+    private Collection<ChessMove> getValidCastleMoves(ChessPosition startPosition) {
+        Collection<ChessMove> moves = new HashSet<>();
+
+        //check if piece is a king
+        ChessPiece piece = board.getPiece(startPosition);
+        if(piece == null || piece.getPieceType() != ChessPiece.PieceType.KING){
+            return moves;
+        }
+
+        //check if the king has moved
+        if(piece.getNumberOfMovesMade() != 0){
+            return moves;
+        }
+
+        //check if in check
+        if(isInCheck(piece.getTeamColor())) {
+            return moves;
+        }
+
+        //check each square in direction dir for check or pieces, until you hit a rook
+        for (int dir = -1; dir < 2; dir += 2) {
+            ChessPosition pos = new ChessPosition(startPosition.getRow(), startPosition.getColumn() + dir);
+            boolean noCheck = true;
+            while (pos.inBounds(8) && board.getPiece(pos) == null) {
+                if (wouldBeInCheckAfterMove(piece.getTeamColor(), new ChessMove(startPosition, pos, null))) {
+                    noCheck = false;
+                }
+                pos = new ChessPosition(startPosition.getRow(), pos.getColumn() + dir);
+            }
+
+            //check if the rook hasn't moved
+            if (noCheck && pos.inBounds(8) && board.getPiece(pos).getPieceType() == ChessPiece.PieceType.ROOK && board.getPiece(pos).getNumberOfMovesMade() == 0) {
+                //if the rook hasn't moved, add a move to the moves collection
+                if(dir == 1) {
+                    moves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 7), null));
+                } else {
+                    moves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 3), null));
+                }
+            }
+        }
+        return moves;
     }
 
     /**
@@ -137,7 +190,11 @@ public class ChessGame {
      */
     public boolean wouldBeInCheckAfterMove(TeamColor teamColor, ChessMove move){
     ChessBoard boardAfterMove = board.copy();
-    boardAfterMove.movePiece(move);
+    try {
+        boardAfterMove.movePiece(move);
+    } catch (InvalidMoveException ex) {
+        return true;
+    }
     return(wouldBeInCheck(boardAfterMove, teamColor));
 }
 
@@ -151,14 +208,14 @@ public class ChessGame {
         if(isInCheck(teamColor)){
             for(ChessPosition pos:getChessPositions(board)) {
                 if(board.getPiece(pos).getTeamColor() == turnColor) {
-                    for (ChessMove move : validMoves(pos)){
-                        if(!wouldBeInCheckAfterMove(teamColor, move)){
+                    for (ChessMove move : validMoves(pos)) {
+                        if (!wouldBeInCheckAfterMove(teamColor, move)) {
                             return false;
                         }
                     }
-                    return true;
                 }
             }
+            return true;
         }
         return false;
     }

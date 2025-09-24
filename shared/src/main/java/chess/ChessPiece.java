@@ -14,10 +14,12 @@ public class ChessPiece {
 
     private final ChessGame.TeamColor color;
     private final PieceType type;
+    private int numberOfMovesMade;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.color = pieceColor;
         this.type = type;
+        numberOfMovesMade = 0;
     }
 
     /**
@@ -91,6 +93,14 @@ public class ChessPiece {
      */
     public PieceType getPieceType() {
         return type;
+    }
+
+    public int getNumberOfMovesMade() {
+        return numberOfMovesMade;
+    }
+
+    public void makeMove(){
+        numberOfMovesMade ++;
     }
 
     /**

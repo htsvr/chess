@@ -131,16 +131,30 @@ public class ChessBoard {
         return boardCopy;
     }
 
-    public boolean movePiece(ChessMove move) {
+    public void movePiece(ChessMove move) throws InvalidMoveException{
         if(getPiece(move.getStartPosition()) == null) {
-            return false;
+            throw new InvalidMoveException("No Piece At Start Position");
         }
         if(move.getPromotionPiece() == null) {
+            //Check if it is a castling move
+            if(getPiece(move.getStartPosition()).getPieceType() == ChessPiece.PieceType.KING && move.getStartPosition().getColumn() == 5) {
+                if(move.getEndPosition().getColumn() == 7) {
+                    if(getPiece(new ChessPosition(move.getStartPosition().getRow(), 8)).getPieceType() != ChessPiece.PieceType.ROOK) {
+                        throw new InvalidMoveException("No Rook In Castle Position");
+                    }
+                    movePiece(new ChessMove(new ChessPosition(move.getStartPosition().getRow(), 8), new ChessPosition(move.getStartPosition().getRow(), 6), null));
+                } else if (move.getEndPosition().getColumn() == 3) {
+                    if(getPiece(new ChessPosition(move.getStartPosition().getRow(), 1)).getPieceType() != ChessPiece.PieceType.ROOK) {
+                        throw new InvalidMoveException("No Rook In Castle Position");
+                    }
+                    movePiece(new ChessMove(new ChessPosition(move.getStartPosition().getRow(), 1), new ChessPosition(move.getStartPosition().getRow(), 4), null));
+                }
+            }
             addPiece(move.getEndPosition(), getPiece(move.getStartPosition()));
         } else {
             addPiece(move.getEndPosition(), new ChessPiece(getPiece(move.getStartPosition()).getTeamColor(), move.getPromotionPiece()));
         }
+        getPiece(move.getEndPosition()).makeMove();
         board[move.getStartPosition().getRow() - 1][move.getStartPosition().getColumn() - 1] = null;
-        return true;
     }
 }
