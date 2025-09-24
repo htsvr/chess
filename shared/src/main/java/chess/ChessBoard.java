@@ -102,20 +102,20 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int r = 7; r >= 0; r--){
-            result += "|";
+            result.append("|");
             for (int c = 0; c < 8; c++) {
                 var piece = getPiece(new ChessPosition(r + 1, c + 1));
                 if (piece == null){
-                    result += " |";
+                    result.append(" |");
                 } else {
-                    result += piece.toString() + "|";
+                    result.append(piece).append("|");
                 }
             }
-            result += "\n";
+            result.append("\n");
         }
-        return result;
+        return result.toString();
     }
 
     public ChessBoard copy() {
@@ -149,6 +149,10 @@ public class ChessBoard {
                     }
                     movePiece(new ChessMove(new ChessPosition(move.getStartPosition().getRow(), 1), new ChessPosition(move.getStartPosition().getRow(), 4), null));
                 }
+            }
+            // Check if it is an enPassant move
+            else if(getPiece(move.getStartPosition()).getPieceType() == ChessPiece.PieceType.PAWN && move.getStartPosition().getColumn() != move.getEndPosition().getColumn() && getPiece(move.getEndPosition()) == null) {
+                board[move.getStartPosition().getRow() - 1][move.getEndPosition().getColumn() - 1] = null;
             }
             addPiece(move.getEndPosition(), getPiece(move.getStartPosition()));
         } else {

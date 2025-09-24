@@ -13,6 +13,7 @@ import java.util.Objects;
 public class ChessGame {
     private ChessBoard board = new ChessBoard();
     private TeamColor turnColor;
+    private ChessMove lastMove;
 
     public ChessGame() {
         // set up new chess board at set it to white's turn
@@ -63,12 +64,33 @@ public class ChessGame {
             if(board.getPiece(startPosition).getPieceType() == ChessPiece.PieceType.KING){
                 valid_moves.addAll(getValidCastleMoves(startPosition));
             } else if(board.getPiece(startPosition).getPieceType() == ChessPiece.PieceType.PAWN){
-                //valid_moves.add(checkIfCanEnPasant(startPosition));
+                ChessMove enPassant = getValidEnPassantMove(startPosition);
+                if(enPassant != null) {
+                    valid_moves.add(enPassant);
+                }
             }
             return valid_moves;
         } else {
             return new HashSet<>();
         }
+    }
+
+    private ChessMove getValidEnPassantMove(ChessPosition startPosition) {
+        //check if piece is a pawn
+        if(board.getPiece(startPosition) != null && board.getPiece(startPosition).getPieceType() == ChessPiece.PieceType.PAWN) {
+            //check if the last move was a pawn directly to the right or left of startPosition
+            if (lastMove != null && board.getPiece(lastMove.getEndPosition()).getPieceType() == ChessPiece.PieceType.PAWN && lastMove.getEndPosition().getRow() == startPosition.getRow() && (lastMove.getEndPosition().getColumn() - 1 == startPosition.getColumn() || lastMove.getEndPosition().getColumn() + 1 == startPosition.getColumn())) {
+                //check if that was the enemy pawn's first move
+                if (board.getPiece(lastMove.getEndPosition()).getNumberOfMovesMade() == 1) {
+                    if (board.getPiece(startPosition).getTeamColor() == TeamColor.WHITE) {
+                        return new ChessMove(startPosition, new ChessPosition(startPosition.getRow() + 1, lastMove.getEndPosition().getColumn()), null);
+                    } else {
+                        return new ChessMove(startPosition, new ChessPosition(startPosition.getRow() - 1, lastMove.getEndPosition().getColumn()), null);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -129,6 +151,7 @@ public class ChessGame {
         if(board.getPiece(move.getStartPosition()) != null && board.getPiece(move.getStartPosition()).getTeamColor() == turnColor && validMoves(move.getStartPosition()).contains(move)){
             board.movePiece(move);
             turnColor = turnColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+            lastMove = move;
         } else {
             throw new InvalidMoveException();
         }
@@ -189,14 +212,14 @@ public class ChessGame {
      * @return true if the team would be in check after the move
      */
     public boolean wouldBeInCheckAfterMove(TeamColor teamColor, ChessMove move){
-    ChessBoard boardAfterMove = board.copy();
-    try {
-        boardAfterMove.movePiece(move);
-    } catch (InvalidMoveException ex) {
-        return true;
+        ChessBoard boardAfterMove = board.copy();
+        try {
+            boardAfterMove.movePiece(move);
+        } catch (InvalidMoveException ex) {
+            return true;
+        }
+        return(wouldBeInCheck(boardAfterMove, teamColor));
     }
-    return(wouldBeInCheck(boardAfterMove, teamColor));
-}
 
     /**
      * Determines if the given team is in checkmate
