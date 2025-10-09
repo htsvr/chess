@@ -1,10 +1,14 @@
 package server;
 
 import com.google.gson.Gson;
+import dataobjects.UserData;
 import io.javalin.*;
 import io.javalin.http.Context;
+import services.AlreadyTakenException;
 
 import java.util.Map;
+
+import static services.UserServices.registerUser;
 
 public class Server {
 
@@ -20,9 +24,19 @@ public class Server {
 
     private void register(Context ctx) {
         Gson serializer = new Gson();
-        var req = serializer.fromJson(ctx.body(), Map.class);
-        var res = Map.of("username", req.get("username"), "authToken", "12345abc");
-        ctx.result(serializer.toJson(res));
+        UserData req = serializer.fromJson(ctx.body(), UserData.class);
+        if(req.username() == null || req.password() == null || req.email() == null) {
+            ctx.status(400);
+            ctx.result("{\"message\": \"Error: bad request\"}");
+        } else {
+            try {
+                var res = registerUser(req);
+                ctx.result(serializer.toJson(res));
+            } catch (AlreadyTakenException e) {
+                ctx.status(403);
+                ctx.result("{\"message\": \"Error: already taken\"}");
+            }
+        }
     }
 
     public int run(int desiredPort) {
