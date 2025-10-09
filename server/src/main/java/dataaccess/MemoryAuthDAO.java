@@ -1,7 +1,6 @@
 package dataaccess;
 
 import dataobjects.AuthData;
-import dataobjects.UserData;
 
 import java.util.ArrayList;
 
@@ -11,6 +10,10 @@ public class MemoryAuthDAO implements AuthDAO{
         authList = new ArrayList<>();
     }
 
+    public void clear() {
+        authList.clear();
+    }
+
     @Override
     public void createAuth(AuthData authData) {
         authList.add(authData);
@@ -18,11 +21,18 @@ public class MemoryAuthDAO implements AuthDAO{
 
     @Override
     public AuthData getAuth(String authToken) {
+        for (AuthData auth:authList) {
+            if (auth.authToken().equals(authToken)){
+                return auth;
+            }
+        }
         return null;
     }
 
     @Override
     public void deleteAuth(AuthData authData) throws DataAccessException {
-        authList.remove(authData);
+        if (!authList.remove(authData)) {
+            throw new DataAccessException("authData: " + authData.toString() + " does not exist");
+        }
     }
 }

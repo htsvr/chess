@@ -1,14 +1,17 @@
 package dataaccess;
 
-import dataobjects.*;
-
 import java.util.ArrayList;
+import dataobjects.UserData;
 
 public class MemoryUserDAO implements UserDAO{
     private final ArrayList<UserData> users;
 
     public MemoryUserDAO() {
         users = new ArrayList<>();
+    }
+
+    public void clear() {
+        users.clear();
     }
 
     @Override

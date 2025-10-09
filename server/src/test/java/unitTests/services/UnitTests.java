@@ -1,8 +1,10 @@
 package unitTests.services;
 
-import org.junit.jupiter.api.*;
 import dataobjects.*;
+import org.junit.jupiter.api.*;
 import services.*;
+
+import java.util.UUID;
 
 import static services.UserServices.*;
 
@@ -37,7 +39,7 @@ public class UnitTests {
         UserData user = new UserData(username, password, email);
         try {
             registerUser(user);
-        } catch (AlreadyTakenException e){
+        } catch (AlreadyTakenException e) {
 
         }
         Assertions.assertThrows(AlreadyTakenException.class, () -> registerUser(user));
@@ -72,5 +74,37 @@ public class UnitTests {
         Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
         LoginRequest req = new LoginRequest(username, "hiEarth");
         Assertions.assertNotNull(Assertions.assertDoesNotThrow(() -> loginUser(req)));
+    }
+
+    @Test
+    @Order(6)
+    public void LogoutSuccess() {
+        String username = "PinkFluffyUnicorns";
+        String password = "dancingOnRainbows";
+        String email = "test@example.com";
+        AuthData auth = Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
+        Assertions.assertDoesNotThrow(() -> logoutUser(auth.authToken()));
+    }
+
+    @Test
+    @Order(7)
+    public void LogoutFailure() {
+        String username = "ThisIsMyUsername";
+        String password = "andThisIsMyPassword";
+        String email = "test@example.com";
+        Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
+        Assertions.assertThrows(UnrecognizedAuthTokenException.class, () -> logoutUser(UUID.randomUUID().toString()));
+    }
+
+    @Test
+    @Order(8)
+    public void clearSuccess() {
+        String username = "testName";
+        String password = "examplePass";
+        String email = "test@example.com";
+        Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
+        LoginRequest req = new LoginRequest(username, password);
+        clear();
+        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> loginUser(req));
     }
 }

@@ -2,11 +2,17 @@ package services;
 
 import dataaccess.*;
 import dataobjects.*;
+
 import java.util.UUID;
 
 public class UserServices {
     private static final UserDAO userDataAccess = new MemoryUserDAO();
     private static final AuthDAO authDataAccess = new MemoryAuthDAO();
+
+    public static void clear () {
+        userDataAccess.clear();
+        authDataAccess.clear();
+    }
 
     public static AuthData registerUser(UserData user) throws AlreadyTakenException {
         if(userDataAccess.getUser(user.username()) != null) {
@@ -32,5 +38,14 @@ public class UserServices {
             throw new IncorrectUsernameOrPasswordException("Incorrect Username or Password");
         }
         return createAuthToken(req.username());
+    }
+
+    public static void logoutUser(String authToken) throws UnrecognizedAuthTokenException, DataAccessException {
+        AuthData auth = authDataAccess.getAuth(authToken);
+        if (auth == null) {
+            throw new UnrecognizedAuthTokenException("Unrecognized Auth Token: " + authToken);
+        } else {
+            authDataAccess.deleteAuth(auth);
+        }
     }
 }
