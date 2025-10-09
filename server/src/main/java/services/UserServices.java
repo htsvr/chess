@@ -14,12 +14,23 @@ public class UserServices {
         }
 
         userDataAccess.createUser(user);
-        AuthData auth = new AuthData(user.username(), UUID.randomUUID().toString());
+        return createAuthToken(user.username());
+    }
+
+    private static AuthData createAuthToken(String username) {
+        AuthData auth = new AuthData(username, UUID.randomUUID().toString());
         authDataAccess.createAuth(auth);
         return auth;
     }
 
     public static AuthData login(LoginRequest req) throws IncorrectUsernameOrPasswordException{
-        return null;
+        UserData user = userDataAccess.getUser(req.username());
+        if(user == null) {
+            throw new IncorrectUsernameOrPasswordException("Username doesn't exist");
+        }
+        if(!user.password().equals(req.password())) {
+            throw new IncorrectUsernameOrPasswordException("Incorrect Username or Password");
+        }
+        return createAuthToken(req.username());
     }
 }
