@@ -23,7 +23,7 @@ public class UserServices {
         return auth;
     }
 
-    public static AuthData login(LoginRequest req) throws IncorrectUsernameOrPasswordException{
+    public static AuthData loginUser(LoginRequest req) throws IncorrectUsernameOrPasswordException{
         UserData user = userDataAccess.getUser(req.username());
         if(user == null) {
             throw new IncorrectUsernameOrPasswordException("Username doesn't exist");

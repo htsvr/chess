@@ -49,7 +49,7 @@ public class UnitTests {
         String username = "newUsername";
         String password = "password123";
         LoginRequest req = new LoginRequest(username, password);
-        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> login(req));
+        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> loginUser(req));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class UnitTests {
         String email = "123@example.com";
         Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
         LoginRequest req = new LoginRequest(username, "badPassword");
-        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> login(req));
+        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> loginUser(req));
     }
 
     @Test
@@ -71,6 +71,6 @@ public class UnitTests {
         String email = "test@example.com";
         Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
         LoginRequest req = new LoginRequest(username, "hiEarth");
-        Assertions.assertNotNull(Assertions.assertDoesNotThrow(() -> login(req)));
+        Assertions.assertNotNull(Assertions.assertDoesNotThrow(() -> loginUser(req)));
     }
 }
