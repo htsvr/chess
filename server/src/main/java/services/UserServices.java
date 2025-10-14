@@ -4,25 +4,25 @@ import dataaccess.*;
 import dataobjects.*;
 
 public class UserServices {
-    private static final UserDAO userDataAccess = new MemoryUserDAO();
+    private static final UserDAO USER_DATA_ACCESS = new MemoryUserDAO();
 
     public static void clear () {
-        userDataAccess.clear();
+        USER_DATA_ACCESS.clear();
     }
 
     public static AuthData registerUser(UserData user) throws AlreadyTakenException {
-        if(userDataAccess.getUser(user.username()) != null) {
+        if(USER_DATA_ACCESS.getUser(user.username()) != null) {
             throw new AlreadyTakenException("Username already taken");
         }
 
-        userDataAccess.createUser(user);
+        USER_DATA_ACCESS.createUser(user);
         return AuthServices.createAuthToken(user.username());
     }
 
 
 
     public static AuthData loginUser(LoginRequest req) throws IncorrectUsernameOrPasswordException{
-        UserData user = userDataAccess.getUser(req.username());
+        UserData user = USER_DATA_ACCESS.getUser(req.username());
         if(user == null) {
             throw new IncorrectUsernameOrPasswordException("Username doesn't exist");
         }

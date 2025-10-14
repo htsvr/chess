@@ -6,35 +6,35 @@ import dataobjects.*;
 import java.util.UUID;
 
 public class AuthServices {
-    private static final AuthDAO authDataAccess = new MemoryAuthDAO();
+    private static final AuthDAO AUTH_DATA_ACCESS = new MemoryAuthDAO();
 
     public static void clear () {
-        authDataAccess.clear();
+        AUTH_DATA_ACCESS.clear();
     }
 
     public static AuthData createAuthToken(String username) {
         AuthData auth = new AuthData(username, UUID.randomUUID().toString());
-        authDataAccess.createAuth(auth);
+        AUTH_DATA_ACCESS.createAuth(auth);
         return auth;
     }
 
     public static void logoutUser(String authToken) throws UnrecognizedAuthTokenException, DataAccessException {
-        AuthData auth = authDataAccess.getAuth(authToken);
+        AuthData auth = AUTH_DATA_ACCESS.getAuth(authToken);
         if (auth == null) {
             throw new UnrecognizedAuthTokenException("Unrecognized Auth Token: " + authToken);
         } else {
-            authDataAccess.deleteAuth(auth);
+            AUTH_DATA_ACCESS.deleteAuth(auth);
         }
     }
 
     public static void validateAuth (String authToken) throws UnrecognizedAuthTokenException{
-        if (authDataAccess.getAuth(authToken) == null) {
+        if (AUTH_DATA_ACCESS.getAuth(authToken) == null) {
             throw new UnrecognizedAuthTokenException("Invalid Auth Token");
         }
     }
 
     public static AuthData getAuthToken(String auth) throws UnrecognizedAuthTokenException{
         validateAuth(auth);
-        return authDataAccess.getAuth(auth);
+        return AUTH_DATA_ACCESS.getAuth(auth);
     }
 }

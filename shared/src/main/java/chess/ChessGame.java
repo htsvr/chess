@@ -54,22 +54,22 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         if(board.getPiece(startPosition) != null) { //Check if space is a piece
-            Collection<ChessMove> all_moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
-            Collection<ChessMove> valid_moves = new HashSet<>();
-            for(ChessMove move:all_moves) {
+            Collection<ChessMove> allMoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
+            Collection<ChessMove> validMoves = new HashSet<>();
+            for(ChessMove move:allMoves) {
                 if(!wouldBeInCheckAfterMove(board.getPiece(startPosition).getTeamColor(), move)){
-                    valid_moves.add(move);
+                    validMoves.add(move);
                 }
             }
             if(board.getPiece(startPosition).getPieceType() == ChessPiece.PieceType.KING){
-                valid_moves.addAll(getValidCastleMoves(startPosition));
+                validMoves.addAll(getValidCastleMoves(startPosition));
             } else if(board.getPiece(startPosition).getPieceType() == ChessPiece.PieceType.PAWN){
                 ChessMove enPassant = getValidEnPassantMove(startPosition);
                 if(enPassant != null) {
-                    valid_moves.add(enPassant);
+                    validMoves.add(enPassant);
                 }
             }
-            return valid_moves;
+            return validMoves;
         } else {
             return new HashSet<>();
         }

@@ -48,7 +48,7 @@ public class UnitTests {
 
     @Test
     @Order(3)
-    public void logInFalure() {
+    public void logInFailure() {
         String username = "newUsername";
         String password = "password123";
         LoginRequest req = new LoginRequest(username, password);
@@ -57,7 +57,7 @@ public class UnitTests {
 
     @Test
     @Order(4)
-    public void logInFalureWithIncorrectPassword() {
+    public void logInFailureWithIncorrectPassword() {
         String username = "CowsCanFly";
         String password = "helloWorld";
         String email = "123@example.com";
@@ -79,7 +79,7 @@ public class UnitTests {
 
     @Test
     @Order(6)
-    public void LogoutSuccess() {
+    public void logoutSuccess() {
         String username = "PinkFluffyUnicorns";
         String password = "dancingOnRainbows";
         String email = "test@example.com";
@@ -89,7 +89,7 @@ public class UnitTests {
 
     @Test
     @Order(7)
-    public void LogoutFailure() {
+    public void logoutFailure() {
         String username = "ThisIsMyUsername";
         String password = "andThisIsMyPassword";
         String email = "test@example.com";

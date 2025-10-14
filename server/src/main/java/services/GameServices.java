@@ -11,43 +11,43 @@ import java.util.Collection;
 import java.util.Random;
 
 public class GameServices {
-    private static final GameDAO gameDataAccess = new MemoryGameDAO();
-    private static final Random rand = new Random();
+    private static final GameDAO GAME_DATA_ACCESS = new MemoryGameDAO();
+    private static final Random RANDOM_GENERATOR = new Random();
 
     public static void clear() {
-        gameDataAccess.clear();
+        GAME_DATA_ACCESS.clear();
     }
 
     public static Collection<GameData> listGames(String authToken) throws UnrecognizedAuthTokenException{
         AuthServices.validateAuth(authToken);
-        return gameDataAccess.getGames();
+        return GAME_DATA_ACCESS.getGames();
     }
 
     public static int createGame(String gameName, String authToken) throws UnrecognizedAuthTokenException{
         AuthServices.validateAuth(authToken);
-        int gameID = rand.nextInt(99998)+1;
-        while(gameDataAccess.getGame(gameID) != null) {
-            gameID = rand.nextInt(99998)+1;
+        int gameID = RANDOM_GENERATOR.nextInt(99998)+1;
+        while(GAME_DATA_ACCESS.getGame(gameID) != null) {
+            gameID = RANDOM_GENERATOR.nextInt(99998)+1;
         }
-        gameDataAccess.createGame(new GameData(gameID, null, null, gameName, new ChessGame()));
+        GAME_DATA_ACCESS.createGame(new GameData(gameID, null, null, gameName, new ChessGame()));
         return gameID;
     }
 
     public static void joinGame(JoinRequest req) throws UnrecognizedAuthTokenException, AlreadyTakenException, DataAccessException {
         String username = AuthServices.getAuthToken(req.authToken()).username();
-        GameData game = gameDataAccess.getGame(req.gameID());
+        GameData game = GAME_DATA_ACCESS.getGame(req.gameID());
         if (game == null) {
             throw new DataAccessException("Game with gameID: " + req.gameID() + " does not exist");
         } else {
             if(req.playerColor() == ChessGame.TeamColor.WHITE) {
                 if (game.whiteUsername() == null) {
-                    gameDataAccess.updateGame(req.gameID(), new GameData(req.gameID(), username, game.blackUsername(), game.gameName(), game.game()));
+                    GAME_DATA_ACCESS.updateGame(req.gameID(), new GameData(req.gameID(), username, game.blackUsername(), game.gameName(), game.game()));
                 } else {
                     throw new AlreadyTakenException("White is already taken for gameID: " + game.gameID());
                 }
             } else {
                 if (game.blackUsername() == null) {
-                    gameDataAccess.updateGame(req.gameID(), new GameData(req.gameID(), game.whiteUsername(), username, game.gameName(), game.game()));
+                    GAME_DATA_ACCESS.updateGame(req.gameID(), new GameData(req.gameID(), game.whiteUsername(), username, game.gameName(), game.game()));
                 } else {
                     throw new AlreadyTakenException("Black is already taken for gameID: " + game.gameID());
                 }
