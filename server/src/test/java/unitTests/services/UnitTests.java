@@ -148,8 +148,8 @@ public class UnitTests {
         GameServices.clear();
         Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData("bear", "giraffe", "panc@ke.it")));
         AuthData auth = Assertions.assertDoesNotThrow(() -> UserServices.loginUser(new LoginRequest("bear", "giraffe")));
-        int gameID1 = (GameServices.createGame("game1", auth.authToken()));
-        int gameID2 = (GameServices.createGame("game2", auth.authToken()));
+        int gameID1 = Assertions.assertDoesNotThrow(() -> GameServices.createGame("game1", auth.authToken()));
+        int gameID2 = Assertions.assertDoesNotThrow(() -> GameServices.createGame("game2", auth.authToken()));
         Assertions.assertNotEquals(gameID2, gameID1);
     }
 
@@ -161,8 +161,8 @@ public class UnitTests {
         GameServices.clear();
         Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData("bear", "giraffe", "panc@ke.it")));
         AuthData auth = Assertions.assertDoesNotThrow(() -> UserServices.loginUser(new LoginRequest("bear", "giraffe")));
-        int gameID1 = (GameServices.createGame("game1", auth.authToken()));
-        int gameID2 = (GameServices.createGame("game2", auth.authToken()));
+        int gameID1 = Assertions.assertDoesNotThrow(() -> GameServices.createGame("game1", auth.authToken()));
+        int gameID2 = Assertions.assertDoesNotThrow(() -> GameServices.createGame("game2", auth.authToken()));
         Collection<GameData> games = Assertions.assertDoesNotThrow(() -> GameServices.listGames(auth.authToken()));
         Assertions.assertNotNull(games);
         Assertions.assertEquals(2, games.size());
