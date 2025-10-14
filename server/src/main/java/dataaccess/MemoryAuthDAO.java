@@ -2,12 +2,12 @@ package dataaccess;
 
 import dataobjects.AuthData;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MemoryAuthDAO implements AuthDAO{
-    private final ArrayList<AuthData> authList;
+    private final HashMap<String, AuthData> authList;
     public MemoryAuthDAO() {
-        authList = new ArrayList<>();
+        authList = new HashMap<>();
     }
 
     public void clear() {
@@ -16,22 +16,17 @@ public class MemoryAuthDAO implements AuthDAO{
 
     @Override
     public void createAuth(AuthData authData) {
-        authList.add(authData);
+        authList.put(authData.authToken(), authData);
     }
 
     @Override
     public AuthData getAuth(String authToken) {
-        for (AuthData auth:authList) {
-            if (auth.authToken().equals(authToken)){
-                return auth;
-            }
-        }
-        return null;
+        return authList.get(authToken);
     }
 
     @Override
     public void deleteAuth(AuthData authData) throws DataAccessException {
-        if (!authList.remove(authData)) {
+        if (authList.remove(authData.authToken()) == null) {
             throw new DataAccessException("authData: " + authData.toString() + " does not exist");
         }
     }

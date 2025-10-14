@@ -26,4 +26,10 @@ public class AuthServices {
             authDataAccess.deleteAuth(auth);
         }
     }
+
+    public static void validateAuth (String authToken) throws UnrecognizedAuthTokenException{
+        if (authDataAccess.getAuth(authToken) == null) {
+            throw new UnrecognizedAuthTokenException("Invalid Auth Token");
+        }
+    }
 }

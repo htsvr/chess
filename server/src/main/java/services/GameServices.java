@@ -13,8 +13,9 @@ public class GameServices {
         gameDataAccess.clear();
     }
 
-    public static Collection<GameData> listGames(String authToken) {
-        return null;
+    public static Collection<GameData> listGames(String authToken) throws UnrecognizedAuthTokenException{
+        AuthServices.validateAuth(authToken);
+        return gameDataAccess.getGames();
     }
 
     public static int createGame(String gameName, String authToken) {
