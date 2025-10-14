@@ -23,9 +23,9 @@ public class GameServices {
 
     public static int createGame(String gameName, String authToken) throws UnrecognizedAuthTokenException{
         AuthServices.validateAuth(authToken);
-        int gameID = rand.nextInt();
+        int gameID = rand.nextInt(99998)+1;
         while(gameDataAccess.getGame(gameID) != null) {
-            gameID = rand.nextInt();
+            gameID = rand.nextInt(99998)+1;
         }
         gameDataAccess.createGame(new GameData(gameID, null, null, gameName, new ChessGame()));
         return gameID;

@@ -8,6 +8,9 @@ import io.javalin.http.Context;
 
 import services.*;
 
+import java.util.Collection;
+import java.util.Map;
+
 public class Server {
 
     private final Javalin server;
@@ -20,6 +23,40 @@ public class Server {
         server.post("user", this::register);
         server.post("session", this::login);
         server.delete("session", this::logout);
+        server.get("game", this::listGames);
+        server.post("game", this::createGame);
+    }
+
+    private void listGames(Context ctx) {
+        String authToken = ctx.header("Authorization");
+        Gson serializer = new Gson();
+        try {
+            Collection<GameData> gameList = GameServices.listGames(authToken);
+            ctx.status(200);
+            ctx.result("{\"games\": " + serializer.toJson(gameList) + "}");
+        } catch (UnrecognizedAuthTokenException e) {
+            ctx.status(401);
+            ctx.result("{\"message\": \"Error: unauthorized\"}");
+        }
+    }
+
+    private void createGame(Context ctx) {
+        String authToken = ctx.header("Authorization");
+        Gson serializer = new Gson();
+        Map<String, String> body = serializer.fromJson(ctx.body(), Map.class);
+        if (body.get("gameName") == null) {
+            ctx.status(400);
+            ctx.result("{\"message\": \"Error: bad request\"}");
+        } else {
+            try {
+                int gameID = GameServices.createGame(body.get("gameName"), authToken);
+                ctx.status(200);
+                ctx.result("{\"gameID\": " + gameID + "}");
+            } catch (UnrecognizedAuthTokenException e) {
+                ctx.status(401);
+                ctx.result("{\"message\": \"Error: unauthorized\"}");
+            }
+        }
     }
 
     private void register(Context ctx) {
