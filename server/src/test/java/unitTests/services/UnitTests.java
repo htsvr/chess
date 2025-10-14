@@ -1,10 +1,11 @@
 package unitTests.services;
 
+import chess.ChessGame;
 import dataobjects.*;
-import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.*;
 import services.*;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -105,6 +106,49 @@ public class UnitTests {
         LoginRequest req = new LoginRequest(username, password);
         UserServices.clear();
         AuthServices.clear();
+        GameServices.clear();
         Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> UserServices.loginUser(req));
+    }
+
+    @Test
+    @Order(9)
+    public void listGamesSuccess() {
+        UserServices.clear();
+        AuthServices.clear();
+        GameServices.clear();
+        Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData("bear", "giraffe", "panc@ke.it")));
+        AuthData auth = Assertions.assertDoesNotThrow(() -> UserServices.loginUser(new LoginRequest("bear", "giraffe")));
+        Assertions.assertNull(GameServices.listGames(auth.authToken()));
+    }
+
+    @Test
+    @Order(10)
+    public void listGamesFailureWithIncorrectAuthToken() {
+        UserServices.clear();
+        AuthServices.clear();
+        GameServices.clear();
+        Assertions.assertThrows(UnrecognizedAuthTokenException.class, () -> GameServices.listGames("IncorrectAuth"));
+    }
+
+    @Test
+    @Order(11)
+    public void createGameFailureWithIncorrectAuthToken() {
+        UserServices.clear();
+        AuthServices.clear();
+        GameServices.clear();
+        Assertions.assertThrows(UnrecognizedAuthTokenException.class, () -> GameServices.createGame("game1", "IncorrectAuth"));
+    }
+
+    @Test
+    @Order(12)
+    public void createGameSuccess() {
+        UserServices.clear();
+        AuthServices.clear();
+        GameServices.clear();
+        Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData("bear", "giraffe", "panc@ke.it")));
+        AuthData auth = Assertions.assertDoesNotThrow(() -> UserServices.loginUser(new LoginRequest("bear", "giraffe")));
+        int gameID1 = (GameServices.createGame("game1", auth.authToken()));
+        int gameID2 = (GameServices.createGame("game2", auth.authToken()));
+        Assertions.assertEquals(gameID2, gameID1);
     }
 }

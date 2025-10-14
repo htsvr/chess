@@ -1,13 +1,14 @@
 package dataaccess;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+
 import dataobjects.UserData;
 
 public class MemoryUserDAO implements UserDAO{
-    private final ArrayList<UserData> users;
+    private final HashMap<String, UserData> users;
 
     public MemoryUserDAO() {
-        users = new ArrayList<>();
+        users = new HashMap<>();
     }
 
     public void clear() {
@@ -16,16 +17,11 @@ public class MemoryUserDAO implements UserDAO{
 
     @Override
     public UserData getUser(String username) {
-        for (UserData user:users){
-            if(user.username().equals(username)){
-                return user;
-            }
-        }
-        return null;
+        return users.get(username);
     }
 
     @Override
     public void createUser(UserData user) {
-        users.add(user);
+        users.put(user.username(), user);
     }
 }

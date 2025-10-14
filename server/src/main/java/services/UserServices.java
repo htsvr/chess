@@ -2,7 +2,6 @@ package services;
 
 import dataaccess.*;
 import dataobjects.*;
-import services.AuthServices;
 
 public class UserServices {
     private static final UserDAO userDataAccess = new MemoryUserDAO();

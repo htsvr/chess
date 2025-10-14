@@ -2,28 +2,29 @@ package dataaccess;
 
 import dataobjects.GameData;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 
 public class MemoryGameDAO implements GameDAO{
-    public final ArrayList<GameData> gameList;
+    public final HashMap<Integer, GameData> gameList;
 
     public MemoryGameDAO () {
-        gameList = new ArrayList<>();
+        gameList = new HashMap<>();
     }
 
     @Override
-    public void getGames() {
-
+    public Collection<GameData> getGames() {
+        return gameList.values();
     }
 
     @Override
     public GameData getGame(int gameID) {
-        return null;
+        return gameList.get(gameID);
     }
 
     @Override
     public void createGame(GameData game) {
-
+        gameList.put(game.gameID(), game);
     }
 
     @Override
