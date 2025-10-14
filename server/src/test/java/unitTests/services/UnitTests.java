@@ -1,12 +1,11 @@
 package unitTests.services;
 
 import dataobjects.*;
+import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.*;
 import services.*;
 
 import java.util.UUID;
-
-import static services.UserServices.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UnitTests {
@@ -27,22 +26,22 @@ public class UnitTests {
         String username = "abcdef";
         String password = "password123";
         String email = "ex@example.com";
-        Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
+        Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData(username, password, email)));
     }
 
     @Test
     @Order(2)
-    public void registerFalure() {
+    public void registerFailure() {
         String username = "abcdef";
         String password = "password123";
         String email = "ex@example.com";
         UserData user = new UserData(username, password, email);
         try {
-            registerUser(user);
+            UserServices.registerUser(user);
         } catch (AlreadyTakenException e) {
 
         }
-        Assertions.assertThrows(AlreadyTakenException.class, () -> registerUser(user));
+        Assertions.assertThrows(AlreadyTakenException.class, () -> UserServices.registerUser(user));
     }
 
     @Test
@@ -51,7 +50,7 @@ public class UnitTests {
         String username = "newUsername";
         String password = "password123";
         LoginRequest req = new LoginRequest(username, password);
-        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> loginUser(req));
+        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> UserServices.loginUser(req));
     }
 
     @Test
@@ -60,9 +59,9 @@ public class UnitTests {
         String username = "CowsCanFly";
         String password = "helloWorld";
         String email = "123@example.com";
-        Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
+        Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData(username, password, email)));
         LoginRequest req = new LoginRequest(username, "badPassword");
-        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> loginUser(req));
+        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> UserServices.loginUser(req));
     }
 
     @Test
@@ -71,9 +70,9 @@ public class UnitTests {
         String username = "CowsCanNotFly";
         String password = "hiEarth";
         String email = "test@example.com";
-        Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
+        Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData(username, password, email)));
         LoginRequest req = new LoginRequest(username, "hiEarth");
-        Assertions.assertNotNull(Assertions.assertDoesNotThrow(() -> loginUser(req)));
+        Assertions.assertNotNull(Assertions.assertDoesNotThrow(() -> UserServices.loginUser(req)));
     }
 
     @Test
@@ -82,8 +81,8 @@ public class UnitTests {
         String username = "PinkFluffyUnicorns";
         String password = "dancingOnRainbows";
         String email = "test@example.com";
-        AuthData auth = Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
-        Assertions.assertDoesNotThrow(() -> logoutUser(auth.authToken()));
+        AuthData auth = Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData(username, password, email)));
+        Assertions.assertDoesNotThrow(() -> AuthServices.logoutUser(auth.authToken()));
     }
 
     @Test
@@ -92,8 +91,8 @@ public class UnitTests {
         String username = "ThisIsMyUsername";
         String password = "andThisIsMyPassword";
         String email = "test@example.com";
-        Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
-        Assertions.assertThrows(UnrecognizedAuthTokenException.class, () -> logoutUser(UUID.randomUUID().toString()));
+        Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData(username, password, email)));
+        Assertions.assertThrows(UnrecognizedAuthTokenException.class, () -> AuthServices.logoutUser(UUID.randomUUID().toString()));
     }
 
     @Test
@@ -102,9 +101,10 @@ public class UnitTests {
         String username = "testName";
         String password = "examplePass";
         String email = "test@example.com";
-        Assertions.assertDoesNotThrow(() -> registerUser(new UserData(username, password, email)));
+        Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData(username, password, email)));
         LoginRequest req = new LoginRequest(username, password);
-        clear();
-        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> loginUser(req));
+        UserServices.clear();
+        AuthServices.clear();
+        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> UserServices.loginUser(req));
     }
 }

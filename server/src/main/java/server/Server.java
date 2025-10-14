@@ -5,11 +5,8 @@ import dataaccess.DataAccessException;
 import dataobjects.*;
 import io.javalin.*;
 import io.javalin.http.Context;
-import services.AlreadyTakenException;
-import services.IncorrectUsernameOrPasswordException;
-import services.UnrecognizedAuthTokenException;
 
-import static services.UserServices.*;
+import services.*;
 
 public class Server {
 
@@ -19,7 +16,7 @@ public class Server {
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
-        server.delete("db", ctx -> clear());
+        server.delete("db", ctx -> {UserServices.clear(); AuthServices.clear(); GameServices.clear();});
         server.post("user", this::register);
         server.post("session", this::login);
         server.delete("session", this::logout);
@@ -33,7 +30,7 @@ public class Server {
             ctx.result("{\"message\": \"Error: bad request\"}");
         } else {
             try {
-                AuthData res = registerUser(req);
+                AuthData res = UserServices.registerUser(req);
                 ctx.status(200);
                 ctx.result(serializer.toJson(res));
             } catch (AlreadyTakenException e) {
@@ -51,7 +48,7 @@ public class Server {
             ctx.result("{\"message\": \"Error: bad request\"}");
         } else {
             try {
-                AuthData res = loginUser(req);
+                AuthData res = UserServices.loginUser(req);
                 ctx.status(200);
                 ctx.result(serializer.toJson(res));
             } catch (IncorrectUsernameOrPasswordException e) {
@@ -64,7 +61,7 @@ public class Server {
     private void logout(Context ctx) {
         try {
             String authToken = ctx.header("Authorization");
-            logoutUser(authToken);
+            AuthServices.logoutUser(authToken);
             ctx.status(200);
             ctx.result("{}");
         } catch (UnrecognizedAuthTokenException e) {
