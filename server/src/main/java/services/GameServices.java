@@ -34,20 +34,20 @@ public class GameServices {
     }
 
     public static void joinGame(JoinRequest req) throws UnrecognizedAuthTokenException, AlreadyTakenException, DataAccessException {
-        AuthServices.validateAuth(req.authToken().authToken());
+        String username = AuthServices.getAuthToken(req.authToken()).username();
         GameData game = gameDataAccess.getGame(req.gameID());
         if (game == null) {
             throw new DataAccessException("Game with gameID: " + req.gameID() + " does not exist");
         } else {
-            if(req.color() == ChessGame.TeamColor.WHITE) {
+            if(req.playerColor() == ChessGame.TeamColor.WHITE) {
                 if (game.whiteUsername() == null) {
-                    gameDataAccess.updateGame(req.gameID(), new GameData(req.gameID(), req.authToken().username(), game.blackUsername(), game.gameName(), game.game()));
+                    gameDataAccess.updateGame(req.gameID(), new GameData(req.gameID(), username, game.blackUsername(), game.gameName(), game.game()));
                 } else {
                     throw new AlreadyTakenException("White is already taken for gameID: " + game.gameID());
                 }
             } else {
                 if (game.blackUsername() == null) {
-                    gameDataAccess.updateGame(req.gameID(), new GameData(req.gameID(), game.whiteUsername(), req.authToken().username(), game.gameName(), game.game()));
+                    gameDataAccess.updateGame(req.gameID(), new GameData(req.gameID(), game.whiteUsername(), username, game.gameName(), game.game()));
                 } else {
                     throw new AlreadyTakenException("Black is already taken for gameID: " + game.gameID());
                 }

@@ -48,7 +48,7 @@ public class ChessBoardTests extends EqualsTestingUtility<ChessBoard> {
         Assertions.assertEquals(piece.getPieceType(), foundPiece.getPieceType(),
                 "ChessPiece returned by getPiece had the wrong piece type");
         Assertions.assertEquals(piece.getTeamColor(), foundPiece.getTeamColor(),
-                "ChessPiece returned by getPiece had the wrong team color");
+                "ChessPiece returned by getPiece had the wrong team playerColor");
     }
 
     @Test
@@ -83,7 +83,7 @@ public class ChessBoardTests extends EqualsTestingUtility<ChessBoard> {
         };
 
         // Generate boards each with one piece added from a static list.
-        // The color is assigned in a mixed pattern.
+        // The playerColor is assigned in a mixed pattern.
         ChessPiece.PieceType type;
         boolean isWhite;
         for (int col = 1; col <= 8; col++) {

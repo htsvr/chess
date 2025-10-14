@@ -32,4 +32,9 @@ public class AuthServices {
             throw new UnrecognizedAuthTokenException("Invalid Auth Token");
         }
     }
+
+    public static AuthData getAuthToken(String auth) throws UnrecognizedAuthTokenException{
+        validateAuth(auth);
+        return authDataAccess.getAuth(auth);
+    }
 }

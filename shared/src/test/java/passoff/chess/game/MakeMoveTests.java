@@ -209,7 +209,7 @@ public class MakeMoveTests {
     @Test
     @DisplayName("Make Move Changes Team Turn")
     public void makeMoveChangesTurn() throws InvalidMoveException {
-        String failureMessage = "Team color not changed after move made";
+        String failureMessage = "Team playerColor not changed after move made";
 
         game.makeMove(new ChessMove(new ChessPosition(2, 5), new ChessPosition(4, 5), null));
         Assertions.assertEquals(ChessGame.TeamColor.BLACK, game.getTeamTurn(), failureMessage);
@@ -348,7 +348,7 @@ public class MakeMoveTests {
         String pieceAtStart = "After move, a piece is still present in the start position";
         String noPieceAtEnd = "After move, no piece found at the end position";
         String incorrectType = "Found piece at end position is not the correct piece type";
-        String incorrectColor = "Found piece at end position is the wrong team color";
+        String incorrectColor = "Found piece at end position is the wrong team playerColor";
 
         game.setBoard(TestUtilities.loadBoard("""
                 | | | | | | | | |

@@ -25,6 +25,30 @@ public class Server {
         server.delete("session", this::logout);
         server.get("game", this::listGames);
         server.post("game", this::createGame);
+        server.put("game", this::joinGame);
+    }
+
+    private void joinGame(Context ctx) {
+        String authToken = ctx.header("Authorization");
+        Gson serializer = new Gson();
+        try {
+            JoinRequest req = serializer.fromJson(ctx.body(), JoinRequest.class);
+            if(req.playerColor() == null || req.gameID() <= 0) {
+                throw new Exception();
+            }
+            GameServices.joinGame(new JoinRequest(req.playerColor(), req.gameID(), authToken));
+            ctx.status(200);
+            ctx.result("{}");
+        } catch (UnrecognizedAuthTokenException e) {
+            ctx.status(401);
+            ctx.result("{\"message\": \"Error: unauthorized\"}");
+        } catch (AlreadyTakenException e) {
+            ctx.status(403);
+            ctx.result("{\"message\": \"Error: already taken\"}");
+        } catch (Exception e) {
+            ctx.status(400);
+            ctx.result("{\"message\": \"Error: bad request\"}");
+        }
     }
 
     private void listGames(Context ctx) {
@@ -43,19 +67,23 @@ public class Server {
     private void createGame(Context ctx) {
         String authToken = ctx.header("Authorization");
         Gson serializer = new Gson();
-        Map<String, String> body = serializer.fromJson(ctx.body(), Map.class);
-        if (body.get("gameName") == null) {
+        try {
+            Map<String, String> body = serializer.fromJson(ctx.body(), Map.class);
+            if (body.get("gameName") == null) {
+                throw new Exception();
+            } else {
+                try {
+                    int gameID = GameServices.createGame(body.get("gameName"), authToken);
+                    ctx.status(200);
+                    ctx.result("{\"gameID\": " + gameID + "}");
+                } catch (UnrecognizedAuthTokenException e) {
+                    ctx.status(401);
+                    ctx.result("{\"message\": \"Error: unauthorized\"}");
+                }
+            }
+        } catch (Exception e){
             ctx.status(400);
             ctx.result("{\"message\": \"Error: bad request\"}");
-        } else {
-            try {
-                int gameID = GameServices.createGame(body.get("gameName"), authToken);
-                ctx.status(200);
-                ctx.result("{\"gameID\": " + gameID + "}");
-            } catch (UnrecognizedAuthTokenException e) {
-                ctx.status(401);
-                ctx.result("{\"message\": \"Error: unauthorized\"}");
-            }
         }
     }
 
