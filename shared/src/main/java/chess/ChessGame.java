@@ -79,13 +79,19 @@ public class ChessGame {
         //check if piece is a pawn
         if(board.getPiece(startPosition) != null && board.getPiece(startPosition).getPieceType() == ChessPiece.PieceType.PAWN) {
             //check if the last move was a pawn directly to the right or left of startPosition
-            if (lastMove != null && board.getPiece(lastMove.getEndPosition()).getPieceType() == ChessPiece.PieceType.PAWN && lastMove.getEndPosition().getRow() == startPosition.getRow() && (lastMove.getEndPosition().getColumn() - 1 == startPosition.getColumn() || lastMove.getEndPosition().getColumn() + 1 == startPosition.getColumn())) {
-                //check if that was the enemy pawn's first move
-                if (board.getPiece(lastMove.getEndPosition()).getNumberOfMovesMade() == 1) {
-                    if (board.getPiece(startPosition).getTeamColor() == TeamColor.WHITE) {
-                        return new ChessMove(startPosition, new ChessPosition(startPosition.getRow() + 1, lastMove.getEndPosition().getColumn()), null);
-                    } else {
-                        return new ChessMove(startPosition, new ChessPosition(startPosition.getRow() - 1, lastMove.getEndPosition().getColumn()), null);
+            if (lastMove != null && board.getPiece(lastMove.getEndPosition()).getPieceType() == ChessPiece.PieceType.PAWN) {
+                boolean sameRow = lastMove.getEndPosition().getRow() == startPosition.getRow();
+                boolean columnsOffByOne = Math.abs(lastMove.getEndPosition().getColumn() - startPosition.getColumn()) == 1;
+                if(sameRow && columnsOffByOne) {
+                    //check if that was the enemy pawn's first move
+                    if (board.getPiece(lastMove.getEndPosition()).getNumberOfMovesMade() == 1) {
+                        if (board.getPiece(startPosition).getTeamColor() == TeamColor.WHITE) {
+                            ChessPosition pos = new ChessPosition(startPosition.getRow() + 1, lastMove.getEndPosition().getColumn());
+                            return new ChessMove(startPosition, pos, null);
+                        } else {
+                            ChessPosition pos = new ChessPosition(startPosition.getRow() - 1, lastMove.getEndPosition().getColumn());
+                            return new ChessMove(startPosition, pos, null);
+                        }
                     }
                 }
             }
@@ -129,12 +135,14 @@ public class ChessGame {
             }
 
             //check if the rook hasn't moved
-            if (noCheck && pos.inBounds(8) && board.getPiece(pos).getPieceType() == ChessPiece.PieceType.ROOK && board.getPiece(pos).getNumberOfMovesMade() == 0) {
-                //if the rook hasn't moved, add a move to the moves collection
-                if(dir == 1) {
-                    moves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 7), null));
-                } else {
-                    moves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 3), null));
+            if (noCheck && pos.inBounds(8)){
+                if(board.getPiece(pos).getPieceType() == ChessPiece.PieceType.ROOK && board.getPiece(pos).getNumberOfMovesMade() == 0) {
+                    //if the rook hasn't moved, add a move to the moves collection
+                    if (dir == 1) {
+                        moves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 7), null));
+                    } else {
+                        moves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 3), null));
+                    }
                 }
             }
         }
@@ -148,7 +156,8 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        if(board.getPiece(move.getStartPosition()) != null && board.getPiece(move.getStartPosition()).getTeamColor() == turnColor && validMoves(move.getStartPosition()).contains(move)){
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        if(piece != null && piece.getTeamColor() == turnColor && validMoves(move.getStartPosition()).contains(move)){
             board.movePiece(move);
             turnColor = turnColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
             lastMove = move;
@@ -196,13 +205,27 @@ public class ChessGame {
             if(boardToCheck.getPiece(pos).getTeamColor() != teamColor) { //check if piece exists and is on the other team
                 Collection<ChessMove> moves = boardToCheck.getPiece(pos).pieceMoves(boardToCheck, pos);
                 for (ChessMove move:moves) {
-                    if(boardToCheck.getPiece(move.getEndPosition()) != null && boardToCheck.getPiece(move.getEndPosition()).getPieceType() == ChessPiece.PieceType.KING && boardToCheck.getPiece(move.getEndPosition()).getTeamColor() == teamColor){
+                    ChessPiece capturedPiece = boardToCheck.getPiece(move.getEndPosition());
+                    if(capturedPiece != null && capturedPiece.getPieceType() == ChessPiece.PieceType.KING && capturedPiece.getTeamColor() == teamColor){
                         return true;
                     }
                 }
             }
         }
         return false;
+    }
+
+    private boolean pieceCanOnlyMoveIntoCheck(ChessPosition pos, TeamColor kingColor) {
+        if(board.getPiece(pos).getTeamColor() == kingColor) {
+            for (ChessMove move : validMoves(pos)) {
+                if (!wouldBeInCheckAfterMove(kingColor, move)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -230,12 +253,8 @@ public class ChessGame {
     public boolean isInCheckmate(TeamColor teamColor) {
         if(isInCheck(teamColor)){
             for(ChessPosition pos:getChessPositions(board)) {
-                if(board.getPiece(pos).getTeamColor() == turnColor) {
-                    for (ChessMove move : validMoves(pos)) {
-                        if (!wouldBeInCheckAfterMove(teamColor, move)) {
-                            return false;
-                        }
-                    }
+                if(!pieceCanOnlyMoveIntoCheck(pos, teamColor)) {
+                    return false;
                 }
             }
             return true;

@@ -41,13 +41,15 @@ public class GameServices {
         } else {
             if(req.playerColor() == ChessGame.TeamColor.WHITE) {
                 if (game.whiteUsername() == null) {
-                    GAME_DATA_ACCESS.updateGame(req.gameID(), new GameData(req.gameID(), username, game.blackUsername(), game.gameName(), game.game()));
+                    GameData updatedGame = new GameData(req.gameID(), username, game.blackUsername(), game.gameName(), game.game());
+                    GAME_DATA_ACCESS.updateGame(req.gameID(), updatedGame);
                 } else {
                     throw new AlreadyTakenException("White is already taken for gameID: " + game.gameID());
                 }
             } else {
                 if (game.blackUsername() == null) {
-                    GAME_DATA_ACCESS.updateGame(req.gameID(), new GameData(req.gameID(), game.whiteUsername(), username, game.gameName(), game.game()));
+                    GameData updatedGame = new GameData(req.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
+                    GAME_DATA_ACCESS.updateGame(req.gameID(), updatedGame);
                 } else {
                     throw new AlreadyTakenException("Black is already taken for gameID: " + game.gameID());
                 }

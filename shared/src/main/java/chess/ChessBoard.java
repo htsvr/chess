@@ -142,17 +142,24 @@ public class ChessBoard {
                     if(getPiece(new ChessPosition(move.getStartPosition().getRow(), 8)).getPieceType() != ChessPiece.PieceType.ROOK) {
                         throw new InvalidMoveException("No Rook In Castle Position");
                     }
-                    movePiece(new ChessMove(new ChessPosition(move.getStartPosition().getRow(), 8), new ChessPosition(move.getStartPosition().getRow(), 6), null));
+                    ChessPosition startPos = new ChessPosition(move.getStartPosition().getRow(), 8);
+                    ChessPosition endPos = new ChessPosition(move.getStartPosition().getRow(), 6);
+                    movePiece(new ChessMove(startPos, endPos, null));
                 } else if (move.getEndPosition().getColumn() == 3) {
                     if(getPiece(new ChessPosition(move.getStartPosition().getRow(), 1)).getPieceType() != ChessPiece.PieceType.ROOK) {
                         throw new InvalidMoveException("No Rook In Castle Position");
                     }
-                    movePiece(new ChessMove(new ChessPosition(move.getStartPosition().getRow(), 1), new ChessPosition(move.getStartPosition().getRow(), 4), null));
+                    ChessPosition startPos = new ChessPosition(move.getStartPosition().getRow(), 1);
+                    ChessPosition endPos = new ChessPosition(move.getStartPosition().getRow(), 4);
+                    movePiece(new ChessMove(startPos, endPos, null));
                 }
-            }
-            // Check if it is an enPassant move
-            else if(getPiece(move.getStartPosition()).getPieceType() == ChessPiece.PieceType.PAWN && move.getStartPosition().getColumn() != move.getEndPosition().getColumn() && getPiece(move.getEndPosition()) == null) {
-                board[move.getStartPosition().getRow() - 1][move.getEndPosition().getColumn() - 1] = null;
+            } else {
+                // Check if it is an enPassant move
+                boolean isPawn = getPiece(move.getStartPosition()).getPieceType() == ChessPiece.PieceType.PAWN;
+                boolean moveIsDiagonal = move.getStartPosition().getColumn() != move.getEndPosition().getColumn();
+                if (isPawn && moveIsDiagonal && getPiece(move.getEndPosition()) == null) {
+                    board[move.getStartPosition().getRow() - 1][move.getEndPosition().getColumn() - 1] = null;
+                }
             }
             addPiece(move.getEndPosition(), getPiece(move.getStartPosition()));
         } else {

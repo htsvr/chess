@@ -178,7 +178,8 @@ public class UnitTests {
         AuthData auth = Assertions.assertDoesNotThrow(() -> UserServices.loginUser(new LoginRequest("bear", "giraffe")));
         int gameID1 = Assertions.assertDoesNotThrow(() -> GameServices.createGame("game1", auth.authToken()));
         Assertions.assertDoesNotThrow(() -> GameServices.joinGame(new JoinRequest(ChessGame.TeamColor.WHITE, gameID1, auth.authToken())));
-        Assertions.assertTrue(Assertions.assertDoesNotThrow(() -> GameServices.listGames(auth.authToken()).contains(new GameData(gameID1, "bear", null, "game1", new ChessGame()))));
+        GameData correctGameData = new GameData(gameID1, "bear", null, "game1", new ChessGame());
+        Assertions.assertTrue(Assertions.assertDoesNotThrow(() -> GameServices.listGames(auth.authToken()).contains(correctGameData)));
     }
 
     @Test
@@ -191,8 +192,10 @@ public class UnitTests {
         AuthData auth = Assertions.assertDoesNotThrow(() -> UserServices.loginUser(new LoginRequest("bear", "giraffe")));
         int gameID1 = Assertions.assertDoesNotThrow(() -> GameServices.createGame("game1", auth.authToken()));
         Assertions.assertDoesNotThrow(() -> GameServices.joinGame(new JoinRequest(ChessGame.TeamColor.WHITE, gameID1, auth.authToken())));
-        Assertions.assertTrue(Assertions.assertDoesNotThrow(() -> GameServices.listGames(auth.authToken()).contains(new GameData(gameID1, "bear", null, "game1", new ChessGame()))));
-        Assertions.assertThrows(AlreadyTakenException.class, () -> GameServices.joinGame(new JoinRequest(ChessGame.TeamColor.WHITE, gameID1, auth.authToken())));
+        GameData correctGameData = new GameData(gameID1, "bear", null, "game1", new ChessGame());
+        Assertions.assertTrue(Assertions.assertDoesNotThrow(() -> GameServices.listGames(auth.authToken()).contains(correctGameData)));
+        JoinRequest req = new JoinRequest(ChessGame.TeamColor.WHITE, gameID1, auth.authToken());
+        Assertions.assertThrows(AlreadyTakenException.class, () -> GameServices.joinGame(req));
     }
 
     @Test
@@ -204,7 +207,8 @@ public class UnitTests {
         Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData("bear", "giraffe", "panc@ke.it")));
         AuthData auth = Assertions.assertDoesNotThrow(() -> UserServices.loginUser(new LoginRequest("bear", "giraffe")));
         int gameID1 = Assertions.assertDoesNotThrow(() -> GameServices.createGame("game1", auth.authToken()));
-        Assertions.assertThrows(UnrecognizedAuthTokenException.class, () -> GameServices.joinGame(new JoinRequest(ChessGame.TeamColor.WHITE, gameID1, "1532")));
+        JoinRequest req = new JoinRequest(ChessGame.TeamColor.WHITE, gameID1, "1532");
+        Assertions.assertThrows(UnrecognizedAuthTokenException.class, () -> GameServices.joinGame(req));
     }
 
     @Test
@@ -216,6 +220,7 @@ public class UnitTests {
         Assertions.assertDoesNotThrow(() -> UserServices.registerUser(new UserData("bear", "giraffe", "panc@ke.it")));
         AuthData auth = Assertions.assertDoesNotThrow(() -> UserServices.loginUser(new LoginRequest("bear", "giraffe")));
         Assertions.assertDoesNotThrow(() -> GameServices.createGame("game1", auth.authToken()));
-        Assertions.assertThrows(DataAccessException.class, () -> GameServices.joinGame(new JoinRequest(ChessGame.TeamColor.WHITE, 847, auth.authToken())));
+        JoinRequest req = new JoinRequest(ChessGame.TeamColor.WHITE, 847, auth.authToken());
+        Assertions.assertThrows(DataAccessException.class, () -> GameServices.joinGame(req));
     }
 }

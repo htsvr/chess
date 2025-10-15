@@ -137,7 +137,7 @@ public class ChessPiece {
             }
         }
 
-        return new HashSet<ChessMove>();
+        return new HashSet<>();
     }
 
     private Collection<ChessMove> getPawnMoves(ChessBoard board, ChessPosition myPosition) {
@@ -152,7 +152,8 @@ public class ChessPiece {
         if(pos.inBounds(8)){
             if(board.getPiece(pos) == null){
                 moves.addAll(checkPawnPromotion(myPosition, pos));
-                if ((myPosition.getRow() == 2 && pieceColor == ChessGame.TeamColor.WHITE) || (myPosition.getRow() == 7 && pieceColor == ChessGame.TeamColor.BLACK)) {
+                boolean pieceIsWhite = pieceColor == ChessGame.TeamColor.WHITE;
+                if ((myPosition.getRow() == 2 && pieceIsWhite) || (myPosition.getRow() == 7 && !pieceIsWhite)) {
                     pos = new ChessPosition(myPosition.getRow()+2*dir, myPosition.getColumn());
                     if(board.getPiece(pos) == null) {
                         moves.add(new ChessMove(myPosition, pos, null));
@@ -173,7 +174,8 @@ public class ChessPiece {
 
     private Collection<ChessMove> checkPawnPromotion(ChessPosition startPosition, ChessPosition endPosition) {
         Collection<ChessMove> moves = new HashSet<>();
-        if((endPosition.getRow() == 1 && pieceColor == ChessGame.TeamColor.BLACK) || (endPosition.getRow() == 8 && pieceColor == ChessGame.TeamColor.WHITE)) {
+        boolean pieceIsWhite = pieceColor == ChessGame.TeamColor.WHITE;
+        if((endPosition.getRow() == 1 && !pieceIsWhite) || (endPosition.getRow() == 8 && pieceIsWhite)) {
             for (PieceType promotionPiece:PieceType.values()) {
                 if(promotionPiece != PieceType.PAWN && promotionPiece != PieceType.KING) {
                     moves.add(new ChessMove(startPosition, endPosition, promotionPiece));
@@ -185,24 +187,24 @@ public class ChessPiece {
         return moves;
     }
 
-    private Collection<ChessMove> getMovesInDirection(ChessBoard board, ChessPosition startPosition, ChessPosition basePosition, int[] dir, boolean keepGoing) {
+    private Collection<ChessMove> getMovesInDirection(ChessBoard board, ChessPosition startPos, ChessPosition basePos, int[] dir, boolean keepGoing) {
         Collection<ChessMove> moves = new HashSet<>();
-        ChessPosition pos = new ChessPosition(basePosition.getRow()+dir[0], basePosition.getColumn()+dir[1]);
+        ChessPosition pos = new ChessPosition(basePos.getRow()+dir[0], basePos.getColumn()+dir[1]);
         if(pos.inBounds(8)){
             if(board.getPiece(pos) == null){
-                moves.add(new ChessMove(startPosition, pos, null));
+                moves.add(new ChessMove(startPos, pos, null));
                 if(keepGoing){
-                    moves.addAll(getMovesInDirection(board, startPosition, pos, dir, true));
+                    moves.addAll(getMovesInDirection(board, startPos, pos, dir, true));
                 }
             } else if (board.getPiece((pos)).getTeamColor() != pieceColor){
-                moves.add(new ChessMove(startPosition, pos, null));
+                moves.add(new ChessMove(startPos, pos, null));
             }
         }
         return moves;
     }
 
     private Collection<ChessMove> getMovesInDirections(ChessBoard board, ChessPosition startPosition, int[][] dirs, boolean keepGoing) {
-        Collection<ChessMove> moves = new HashSet<ChessMove>();
+        Collection<ChessMove> moves = new HashSet<>();
         for (int[] dir:dirs) {
             moves.addAll(getMovesInDirection(board, startPosition, startPosition, dir, keepGoing));
         }
