@@ -75,23 +75,28 @@ public class ChessGame {
         }
     }
 
+    private boolean lastMoveWasAPawnNextToPos(ChessPosition pos) {
+        if (lastMove != null && board.getPiece(lastMove.getEndPosition()).getPieceType() == ChessPiece.PieceType.PAWN) {
+            boolean sameRow = lastMove.getEndPosition().getRow() == pos.getRow();
+            boolean columnsOffByOne = Math.abs(lastMove.getEndPosition().getColumn() - pos.getColumn()) == 1;
+            return (sameRow && columnsOffByOne);
+        }
+        return false;
+    }
+
     private ChessMove getValidEnPassantMove(ChessPosition startPosition) {
         //check if piece is a pawn
         if(board.getPiece(startPosition) != null && board.getPiece(startPosition).getPieceType() == ChessPiece.PieceType.PAWN) {
             //check if the last move was a pawn directly to the right or left of startPosition
-            if (lastMove != null && board.getPiece(lastMove.getEndPosition()).getPieceType() == ChessPiece.PieceType.PAWN) {
-                boolean sameRow = lastMove.getEndPosition().getRow() == startPosition.getRow();
-                boolean columnsOffByOne = Math.abs(lastMove.getEndPosition().getColumn() - startPosition.getColumn()) == 1;
-                if(sameRow && columnsOffByOne) {
-                    //check if that was the enemy pawn's first move
-                    if (board.getPiece(lastMove.getEndPosition()).getNumberOfMovesMade() == 1) {
-                        if (board.getPiece(startPosition).getTeamColor() == TeamColor.WHITE) {
-                            ChessPosition pos = new ChessPosition(startPosition.getRow() + 1, lastMove.getEndPosition().getColumn());
-                            return new ChessMove(startPosition, pos, null);
-                        } else {
-                            ChessPosition pos = new ChessPosition(startPosition.getRow() - 1, lastMove.getEndPosition().getColumn());
-                            return new ChessMove(startPosition, pos, null);
-                        }
+            if (lastMoveWasAPawnNextToPos(startPosition)){
+                //check if that was the enemy pawn's first move
+                if (board.getPiece(lastMove.getEndPosition()).getNumberOfMovesMade() == 1) {
+                    if (board.getPiece(startPosition).getTeamColor() == TeamColor.WHITE) {
+                        ChessPosition pos = new ChessPosition(startPosition.getRow() + 1, lastMove.getEndPosition().getColumn());
+                        return new ChessMove(startPosition, pos, null);
+                    } else {
+                        ChessPosition pos = new ChessPosition(startPosition.getRow() - 1, lastMove.getEndPosition().getColumn());
+                        return new ChessMove(startPosition, pos, null);
                     }
                 }
             }
@@ -205,8 +210,8 @@ public class ChessGame {
             if(boardToCheck.getPiece(pos).getTeamColor() != teamColor) { //check if piece exists and is on the other team
                 Collection<ChessMove> moves = boardToCheck.getPiece(pos).pieceMoves(boardToCheck, pos);
                 for (ChessMove move:moves) {
-                    ChessPiece capturedPiece = boardToCheck.getPiece(move.getEndPosition());
-                    if(capturedPiece != null && capturedPiece.getPieceType() == ChessPiece.PieceType.KING && capturedPiece.getTeamColor() == teamColor){
+                    ChessPiece piece = boardToCheck.getPiece(move.getEndPosition());
+                    if(piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor){
                         return true;
                     }
                 }
