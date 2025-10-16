@@ -1,11 +1,11 @@
-package services;
+package service;
 
 import dataaccess.*;
 import dataobjects.*;
 
 import java.util.UUID;
 
-public class AuthServices {
+public class AuthService {
     private static final AuthDAO AUTH_DATA_ACCESS = new MemoryAuthDAO();
 
     public static void clear () {

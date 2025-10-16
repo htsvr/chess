@@ -1,4 +1,4 @@
-package services;
+package service;
 
 import chess.ChessGame;
 import dataaccess.DataAccessException;
@@ -10,7 +10,7 @@ import dataobjects.JoinRequest;
 import java.util.Collection;
 import java.util.Random;
 
-public class GameServices {
+public class GameService {
     private static final GameDAO GAME_DATA_ACCESS = new MemoryGameDAO();
     private static final Random RANDOM_GENERATOR = new Random();
 
@@ -19,12 +19,12 @@ public class GameServices {
     }
 
     public static Collection<GameData> listGames(String authToken) throws UnrecognizedAuthTokenException{
-        AuthServices.validateAuth(authToken);
+        AuthService.validateAuth(authToken);
         return GAME_DATA_ACCESS.getGames();
     }
 
     public static int createGame(String gameName, String authToken) throws UnrecognizedAuthTokenException{
-        AuthServices.validateAuth(authToken);
+        AuthService.validateAuth(authToken);
         int gameID = RANDOM_GENERATOR.nextInt(99998)+1;
         while(GAME_DATA_ACCESS.getGame(gameID) != null) {
             gameID = RANDOM_GENERATOR.nextInt(99998)+1;
@@ -34,7 +34,7 @@ public class GameServices {
     }
 
     public static void joinGame(JoinRequest req) throws UnrecognizedAuthTokenException, AlreadyTakenException, DataAccessException {
-        String username = AuthServices.getAuthToken(req.authToken()).username();
+        String username = AuthService.getAuthToken(req.authToken()).username();
         GameData game = GAME_DATA_ACCESS.getGame(req.gameID());
         if (game == null) {
             throw new DataAccessException("Game with gameID: " + req.gameID() + " does not exist");

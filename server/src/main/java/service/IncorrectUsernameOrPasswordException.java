@@ -1,4 +1,4 @@
-package services;
+package service;
 
 /**
  * Indicates that the provided username and password don't match

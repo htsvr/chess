@@ -1,9 +1,9 @@
-package services;
+package service;
 
 import dataaccess.*;
 import dataobjects.*;
 
-public class UserServices {
+public class UserService {
     private static final UserDAO USER_DATA_ACCESS = new MemoryUserDAO();
 
     public static void clear () {
@@ -16,7 +16,7 @@ public class UserServices {
         }
 
         USER_DATA_ACCESS.createUser(user);
-        return AuthServices.createAuthToken(user.username());
+        return AuthService.createAuthToken(user.username());
     }
 
 
@@ -29,6 +29,6 @@ public class UserServices {
         if(!user.password().equals(req.password())) {
             throw new IncorrectUsernameOrPasswordException("Incorrect Username or Password");
         }
-        return AuthServices.createAuthToken(req.username());
+        return AuthService.createAuthToken(req.username());
     }
 }

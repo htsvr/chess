@@ -6,7 +6,7 @@ import dataobjects.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 
-import services.*;
+import service.*;
 
 import java.util.Collection;
 import java.util.Map;
@@ -19,7 +19,8 @@ public class Server {
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
-        server.delete("db", ctx -> {UserServices.clear(); AuthServices.clear(); GameServices.clear();});
+        server.delete("db", ctx -> {
+            UserService.clear(); AuthService.clear(); GameService.clear();});
         server.post("user", this::register);
         server.post("session", this::login);
         server.delete("session", this::logout);
@@ -36,7 +37,7 @@ public class Server {
             if(req.playerColor() == null || req.gameID() <= 0) {
                 throw new Exception();
             }
-            GameServices.joinGame(new JoinRequest(req.playerColor(), req.gameID(), authToken));
+            GameService.joinGame(new JoinRequest(req.playerColor(), req.gameID(), authToken));
             ctx.status(200);
             ctx.result("{}");
         } catch (UnrecognizedAuthTokenException e) {
@@ -55,7 +56,7 @@ public class Server {
         String authToken = ctx.header("Authorization");
         Gson serializer = new Gson();
         try {
-            Collection<GameData> gameList = GameServices.listGames(authToken);
+            Collection<GameData> gameList = GameService.listGames(authToken);
             ctx.status(200);
             ctx.result("{\"games\": " + serializer.toJson(gameList) + "}");
         } catch (UnrecognizedAuthTokenException e) {
@@ -73,7 +74,7 @@ public class Server {
                 throw new Exception();
             } else {
                 try {
-                    int gameID = GameServices.createGame(body.get("gameName"), authToken);
+                    int gameID = GameService.createGame(body.get("gameName"), authToken);
                     ctx.status(200);
                     ctx.result("{\"gameID\": " + gameID + "}");
                 } catch (UnrecognizedAuthTokenException e) {
@@ -95,7 +96,7 @@ public class Server {
             ctx.result("{\"message\": \"Error: bad request\"}");
         } else {
             try {
-                AuthData res = UserServices.registerUser(req);
+                AuthData res = UserService.registerUser(req);
                 ctx.status(200);
                 ctx.result(serializer.toJson(res));
             } catch (AlreadyTakenException e) {
@@ -113,7 +114,7 @@ public class Server {
             ctx.result("{\"message\": \"Error: bad request\"}");
         } else {
             try {
-                AuthData res = UserServices.loginUser(req);
+                AuthData res = UserService.loginUser(req);
                 ctx.status(200);
                 ctx.result(serializer.toJson(res));
             } catch (IncorrectUsernameOrPasswordException e) {
@@ -126,7 +127,7 @@ public class Server {
     private void logout(Context ctx) {
         try {
             String authToken = ctx.header("Authorization");
-            AuthServices.logoutUser(authToken);
+            AuthService.logoutUser(authToken);
             ctx.status(200);
             ctx.result("{}");
         } catch (UnrecognizedAuthTokenException e) {

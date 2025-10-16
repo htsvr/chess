@@ -1,4 +1,4 @@
-package services;
+package service;
 
 /**
  * Indicates that a username was already taken
