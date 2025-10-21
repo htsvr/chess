@@ -1,7 +1,6 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
 import dataobjects.*;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -133,7 +132,7 @@ public class Server {
         } catch (UnrecognizedAuthTokenException e) {
             ctx.status(401);
             ctx.result("{\"message\": \"Error: unauthorized\"}");
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             ctx.status(500);
         }
     }
