@@ -11,7 +11,7 @@ public class AuthService {
     /**
      * clears everything in the auth data database
      */
-    public static void clear () {
+    public static void clear() throws DataAccessException {
         AUTH_DATA_ACCESS.clear();
     }
 
@@ -31,7 +31,7 @@ public class AuthService {
      * @param authToken the auth token to remove from the database
      * @throws UnrecognizedAuthTokenException if the authToken is null or not in the database
      */
-    public static void logoutUser(String authToken) throws UnrecognizedAuthTokenException, DataAccessException {
+    public static void logoutUser(String authToken) throws UnrecognizedAuthTokenException {
         try {
             AuthData auth = AUTH_DATA_ACCESS.getAuth(authToken);
             AUTH_DATA_ACCESS.deleteAuth(auth);
@@ -45,7 +45,7 @@ public class AuthService {
      * @param authToken the auth token to validate
      * @throws UnrecognizedAuthTokenException if the auth token isn't in the database
      */
-    public static void validateAuth (String authToken) throws UnrecognizedAuthTokenException, DataAccessException{
+    public static void validateAuth (String authToken) throws UnrecognizedAuthTokenException {
         try {
             AUTH_DATA_ACCESS.getAuth(authToken);
         } catch (DataAccessException _) {

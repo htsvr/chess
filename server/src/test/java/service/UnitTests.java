@@ -39,7 +39,7 @@ public class UnitTests {
         UserData user = new UserData(username, password, email);
         try {
             UserService.registerUser(user);
-        } catch (AlreadyTakenException e) {
+        } catch (AlreadyTakenException _) {
 
         }
         Assertions.assertThrows(AlreadyTakenException.class, () -> UserService.registerUser(user));
@@ -98,7 +98,7 @@ public class UnitTests {
 
     @Test
     @Order(8)
-    public void clearSuccess() {
+    public void clearSuccess() throws Exception{
         String username = "testName";
         String password = "examplePass";
         String email = "test@example.com";
@@ -112,7 +112,7 @@ public class UnitTests {
 
     @Test
     @Order(9)
-    public void listGamesSuccess() {
+    public void listGamesSuccess() throws Exception{
         UserService.clear();
         AuthService.clear();
         GameService.clear();
@@ -123,7 +123,7 @@ public class UnitTests {
 
     @Test
     @Order(10)
-    public void listGamesFailureWithIncorrectAuthToken() {
+    public void listGamesFailureWithIncorrectAuthToken() throws Exception{
         UserService.clear();
         AuthService.clear();
         GameService.clear();
@@ -132,7 +132,7 @@ public class UnitTests {
 
     @Test
     @Order(11)
-    public void createGameFailureWithIncorrectAuthToken() {
+    public void createGameFailureWithIncorrectAuthToken() throws Exception{
         UserService.clear();
         AuthService.clear();
         GameService.clear();
@@ -141,7 +141,7 @@ public class UnitTests {
 
     @Test
     @Order(12)
-    public void createGameSuccess() {
+    public void createGameSuccess() throws Exception{
         UserService.clear();
         AuthService.clear();
         GameService.clear();
@@ -154,7 +154,7 @@ public class UnitTests {
 
     @Test
     @Order(13)
-    public void createGameAndListGames() {
+    public void createGameAndListGames() throws Exception{
         UserService.clear();
         AuthService.clear();
         GameService.clear();
@@ -169,7 +169,7 @@ public class UnitTests {
 
     @Test
     @Order(14)
-    public void joinGameSuccess() {
+    public void joinGameSuccess() throws Exception{
         UserService.clear();
         AuthService.clear();
         GameService.clear();
@@ -183,7 +183,7 @@ public class UnitTests {
 
     @Test
     @Order(15)
-    public void joinGameFailureAlreadyTaken() {
+    public void joinGameFailureAlreadyTaken() throws Exception{
         UserService.clear();
         AuthService.clear();
         GameService.clear();
@@ -199,7 +199,7 @@ public class UnitTests {
 
     @Test
     @Order(16)
-    public void joinGameFailureInvalidAuthToken() {
+    public void joinGameFailureInvalidAuthToken() throws Exception{
         UserService.clear();
         AuthService.clear();
         GameService.clear();
@@ -212,7 +212,7 @@ public class UnitTests {
 
     @Test
     @Order(17)
-    public void joinGameFailureInvalidGameID() {
+    public void joinGameFailureInvalidGameID() throws Exception{
         UserService.clear();
         AuthService.clear();
         GameService.clear();

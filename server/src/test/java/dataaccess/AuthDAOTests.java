@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AuthDAOTests {
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryAuthDAO.class})
+    @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
     public void createAuthSuccess(Class<? extends AuthDAO> DAOClass) throws Exception {
         AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -23,7 +23,7 @@ public class AuthDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryAuthDAO.class})
+    @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
     public void createAuthFailure(Class<? extends AuthDAO> DAOClass) throws Exception {
         AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -38,7 +38,7 @@ public class AuthDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryAuthDAO.class})
+    @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
     public void clearSuccess(Class<? extends AuthDAO> DAOClass) throws Exception {
         AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         String user = "testUser";
@@ -50,7 +50,7 @@ public class AuthDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryAuthDAO.class})
+    @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
     public void getAuthSuccess(Class<? extends AuthDAO> DAOClass) throws Exception {
         AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -69,7 +69,7 @@ public class AuthDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryAuthDAO.class})
+    @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
     public void getAuthFailure(Class<? extends AuthDAO> DAOClass) throws Exception {
         AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -79,7 +79,7 @@ public class AuthDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryAuthDAO.class})
+    @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
     public void deleteAuthSuccess(Class<? extends AuthDAO> DAOClass) throws Exception {
         AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -92,7 +92,7 @@ public class AuthDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryAuthDAO.class})
+    @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
     public void deleteAuthFailure(Class<? extends AuthDAO> DAOClass) throws Exception {
         AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
