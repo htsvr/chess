@@ -31,7 +31,10 @@ public class AuthDAOTests {
         String authToken = UUID.randomUUID().toString();
         AuthData data = new AuthData(user, authToken);
         dataAccess.createAuth(data);
-        assertThrows(DataAccessException.class, () -> dataAccess.createAuth(data));
+        String user2 = "differentUser";
+        AuthData data2 = new AuthData(user2, authToken);
+        assertThrows(DataAccessException.class, () -> dataAccess.createAuth(data2));
+        assertEquals(data, dataAccess.getAuth(authToken));
     }
 
     @ParameterizedTest

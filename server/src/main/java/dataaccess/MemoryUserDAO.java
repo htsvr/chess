@@ -16,12 +16,19 @@ public class MemoryUserDAO implements UserDAO{
     }
 
     @Override
-    public UserData getUser(String username) {
-        return users.get(username);
+    public UserData getUser(String username) throws DataAccessException{
+        UserData user = users.get(username);
+        if (user == null) {
+            throw new DataAccessException("user doesn't exist");
+        }
+        return user;
     }
 
     @Override
-    public void createUser(UserData user) {
+    public void createUser(UserData user) throws DataAccessException{
+        if(users.get(user.username()) != null) {
+            throw new DataAccessException("user already exists");
+        }
         users.put(user.username(), user);
     }
 }

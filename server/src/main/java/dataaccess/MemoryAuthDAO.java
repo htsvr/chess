@@ -16,9 +16,10 @@ public class MemoryAuthDAO implements AuthDAO{
 
     @Override
     public void createAuth(AuthData authData) throws DataAccessException{
-        if(authList.put(authData.authToken(), authData) != null) {
+        if (authList.get(authData.authToken()) != null) {
             throw new DataAccessException("duplicate authToken");
         }
+        authList.put(authData.authToken(), authData);
     }
 
     @Override

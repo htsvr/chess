@@ -64,6 +64,7 @@ public class UserDAOTests {
         UserData user2 = new UserData(username, password2, email2);
         dataAccess.createUser(user);
         assertThrows(DataAccessException.class, () -> dataAccess.createUser(user2));
+        assertEquals(user, dataAccess.getUser(username));
     }
 
     @ParameterizedTest
