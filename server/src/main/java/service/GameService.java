@@ -17,7 +17,7 @@ public class GameService {
     /**
      * clears everything in the game data database
      */
-    public static void clear() {
+    public static void clear() throws DataAccessException {
         GAME_DATA_ACCESS.clear();
     }
 

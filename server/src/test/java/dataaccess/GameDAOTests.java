@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class GameDAOTests {
     @ParameterizedTest
-    @ValueSource(classes = {MemoryGameDAO.class})
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     public void getGamesSuccess(Class<? extends GameDAO> DAOClass) throws Exception {
         GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         ArrayList<GameData> games = new ArrayList<>();
@@ -33,7 +33,7 @@ public class GameDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryGameDAO.class})
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     public void getGameSuccess(Class<? extends GameDAO> DAOClass) throws Exception {
         GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -50,7 +50,7 @@ public class GameDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryGameDAO.class})
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     public void getGameFailure(Class<? extends GameDAO> DAOClass) throws Exception {
         GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -61,7 +61,7 @@ public class GameDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryGameDAO.class})
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     public void createGameSuccess(Class<? extends GameDAO> DAOClass) throws Exception {
         GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -72,7 +72,7 @@ public class GameDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryGameDAO.class})
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     public void createGameFailure(Class<? extends GameDAO> DAOClass) throws Exception {
         GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -83,7 +83,7 @@ public class GameDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryGameDAO.class})
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     public void clearSuccess(Class<? extends GameDAO> DAOClass) throws Exception {
         GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -95,7 +95,7 @@ public class GameDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryGameDAO.class})
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     public void updateGameSuccess(Class<? extends GameDAO> DAOClass) throws Exception {
         GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -113,7 +113,7 @@ public class GameDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryGameDAO.class})
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     public void updateGameFailure(Class<? extends GameDAO> DAOClass) throws Exception {
         GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
