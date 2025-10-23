@@ -3,6 +3,8 @@ package service;
 import dataaccess.*;
 import dataobjects.*;
 
+import javax.xml.crypto.Data;
+
 public class UserService {
     private static final UserDAO USER_DATA_ACCESS = new MemoryUserDAO();
 
@@ -20,12 +22,13 @@ public class UserService {
      * @throws AlreadyTakenException if a user with the given username already exists
      */
     public static AuthData registerUser(UserData user) throws AlreadyTakenException, DataAccessException {
-        if(USER_DATA_ACCESS.getUser(user.username()) != null) {
+        try{
+            USER_DATA_ACCESS.getUser(user.username());
             throw new AlreadyTakenException("Username already taken");
+        } catch (DataAccessException e){
+            USER_DATA_ACCESS.createUser(user);
+            return AuthService.createAuthToken(user.username());
         }
-
-        USER_DATA_ACCESS.createUser(user);
-        return AuthService.createAuthToken(user.username());
     }
 
 

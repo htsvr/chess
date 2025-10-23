@@ -51,7 +51,7 @@ public class UnitTests {
         String username = "newUsername";
         String password = "password123";
         LoginRequest req = new LoginRequest(username, password);
-        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> UserService.loginUser(req));
+        Assertions.assertThrows(DataAccessException.class, () -> UserService.loginUser(req));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class UnitTests {
         UserService.clear();
         AuthService.clear();
         GameService.clear();
-        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> UserService.loginUser(req));
+        Assertions.assertThrows(DataAccessException.class, () -> UserService.loginUser(req));
     }
 
     @Test

@@ -42,10 +42,15 @@ public class GameService {
     public static int createGame(String gameName, String authToken) throws UnrecognizedAuthTokenException, DataAccessException{
         AuthService.validateAuth(authToken);
         int gameID = RANDOM_GENERATOR.nextInt(99998)+1;
-        while(GAME_DATA_ACCESS.getGame(gameID) != null) {
-            gameID = RANDOM_GENERATOR.nextInt(99998)+1;
+        while(true) {
+            try{
+                GAME_DATA_ACCESS.getGame(gameID);
+                gameID = RANDOM_GENERATOR.nextInt(99998)+1;
+            } catch (DataAccessException _) {
+                GAME_DATA_ACCESS.createGame(new GameData(gameID, null, null, gameName, new ChessGame()));
+                break;
+            }
         }
-        GAME_DATA_ACCESS.createGame(new GameData(gameID, null, null, gameName, new ChessGame()));
         return gameID;
     }
 

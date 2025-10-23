@@ -2,6 +2,7 @@ package dataaccess;
 
 import dataobjects.GameData;
 
+import javax.xml.crypto.Data;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -18,12 +19,19 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public GameData getGame(int gameID) {
-        return gameList.get(gameID);
+    public GameData getGame(int gameID) throws DataAccessException {
+        GameData game = gameList.get(gameID);
+        if (game == null) {
+            throw new DataAccessException("game doesn't exist");
+        }
+        return game;
     }
 
     @Override
-    public void createGame(GameData game) {
+    public void createGame(GameData game) throws DataAccessException {
+        if(gameList.get(game.gameID()) != null) {
+            throw new DataAccessException("game already exists");
+        }
         gameList.put(game.gameID(), game);
     }
 
@@ -33,7 +41,10 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public void updateGame(int gameID, GameData game) {
+    public void updateGame(int gameID, GameData game) throws DataAccessException{
+        if (gameList.get(gameID) == null) {
+            throw new DataAccessException("game doesn't exist");
+        }
         gameList.put(gameID, game);
     }
 }

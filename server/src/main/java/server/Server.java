@@ -124,7 +124,7 @@ public class Server {
                 AuthData res = UserService.loginUser(req);
                 ctx.status(200);
                 ctx.result(serializer.toJson(res));
-            } catch (IncorrectUsernameOrPasswordException e) {
+            } catch (IncorrectUsernameOrPasswordException | DataAccessException e) {
                 ctx.status(401);
                 ctx.result("{\"message\": \"Error: unauthorized\"}");
             } catch (Exception e) {

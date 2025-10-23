@@ -32,8 +32,8 @@ public class AuthService {
      * @throws UnrecognizedAuthTokenException if the authToken is null or not in the database
      */
     public static void logoutUser(String authToken) throws UnrecognizedAuthTokenException, DataAccessException {
-        AuthData auth = AUTH_DATA_ACCESS.getAuth(authToken);
         try {
+            AuthData auth = AUTH_DATA_ACCESS.getAuth(authToken);
             AUTH_DATA_ACCESS.deleteAuth(auth);
         } catch (DataAccessException | NullPointerException e) {
             throw new UnrecognizedAuthTokenException("Unrecognized Auth Token: " + authToken);
@@ -46,7 +46,9 @@ public class AuthService {
      * @throws UnrecognizedAuthTokenException if the auth token isn't in the database
      */
     public static void validateAuth (String authToken) throws UnrecognizedAuthTokenException, DataAccessException{
-        if (AUTH_DATA_ACCESS.getAuth(authToken) == null) {
+        try {
+            AUTH_DATA_ACCESS.getAuth(authToken);
+        } catch (DataAccessException _) {
             throw new UnrecognizedAuthTokenException("Invalid Auth Token");
         }
     }
