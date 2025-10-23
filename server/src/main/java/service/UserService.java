@@ -3,15 +3,13 @@ package service;
 import dataaccess.*;
 import dataobjects.*;
 
-import javax.xml.crypto.Data;
-
 public class UserService {
     private static final UserDAO USER_DATA_ACCESS = new MemoryUserDAO();
 
     /**
      * clears everything in the user data database
      */
-    public static void clear () {
+    public static void clear () throws DataAccessException{
         USER_DATA_ACCESS.clear();
     }
 

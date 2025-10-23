@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UserDAOTests {
     @ParameterizedTest
-    @ValueSource(classes = {MemoryUserDAO.class})
+    @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
     public void getUserSuccess(Class<? extends UserDAO> DAOClass) throws Exception {
         UserDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -28,7 +28,7 @@ public class UserDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryUserDAO.class})
+    @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
     public void getUserFailure(Class<? extends UserDAO> DAOClass) throws Exception {
         UserDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -37,7 +37,7 @@ public class UserDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryUserDAO.class})
+    @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
     public void createUserSuccess(Class<? extends UserDAO> DAOClass) throws Exception {
         UserDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -50,7 +50,7 @@ public class UserDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryUserDAO.class})
+    @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
     public void createUserFailure(Class<? extends UserDAO> DAOClass) throws Exception {
         UserDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
@@ -68,7 +68,7 @@ public class UserDAOTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {MemoryUserDAO.class})
+    @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
     public void clearSuccess(Class<? extends UserDAO> DAOClass) throws Exception {
         UserDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
