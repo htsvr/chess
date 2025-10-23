@@ -20,7 +20,7 @@ public class AuthService {
      * @param username username of the user
      * @return an AuthData object containing the username and generated auth token
      */
-    public static AuthData createAuthToken(String username) {
+    public static AuthData createAuthToken(String username) throws DataAccessException{
         AuthData auth = new AuthData(username, UUID.randomUUID().toString());
         AUTH_DATA_ACCESS.createAuth(auth);
         return auth;
@@ -31,7 +31,7 @@ public class AuthService {
      * @param authToken the auth token to remove from the database
      * @throws UnrecognizedAuthTokenException if the authToken is null or not in the database
      */
-    public static void logoutUser(String authToken) throws UnrecognizedAuthTokenException {
+    public static void logoutUser(String authToken) throws UnrecognizedAuthTokenException, DataAccessException {
         AuthData auth = AUTH_DATA_ACCESS.getAuth(authToken);
         try {
             AUTH_DATA_ACCESS.deleteAuth(auth);
@@ -45,7 +45,7 @@ public class AuthService {
      * @param authToken the auth token to validate
      * @throws UnrecognizedAuthTokenException if the auth token isn't in the database
      */
-    public static void validateAuth (String authToken) throws UnrecognizedAuthTokenException{
+    public static void validateAuth (String authToken) throws UnrecognizedAuthTokenException, DataAccessException{
         if (AUTH_DATA_ACCESS.getAuth(authToken) == null) {
             throw new UnrecognizedAuthTokenException("Invalid Auth Token");
         }
@@ -57,7 +57,7 @@ public class AuthService {
      * @return and AuthData object containing the given auth token
      * @throws UnrecognizedAuthTokenException if the auth token isn't in the database
      */
-    public static AuthData getAuthToken(String auth) throws UnrecognizedAuthTokenException{
+    public static AuthData getAuthToken(String auth) throws UnrecognizedAuthTokenException, DataAccessException{
         validateAuth(auth);
         return AUTH_DATA_ACCESS.getAuth(auth);
     }

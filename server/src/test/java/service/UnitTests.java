@@ -32,7 +32,7 @@ public class UnitTests {
 
     @Test
     @Order(2)
-    public void registerFailure() {
+    public void registerFailure() throws Exception{
         String username = "abcdef";
         String password = "password123";
         String email = "ex@example.com";

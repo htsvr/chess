@@ -19,7 +19,7 @@ public class UserService {
      * @return an AuthData object containing the username generated auth token
      * @throws AlreadyTakenException if a user with the given username already exists
      */
-    public static AuthData registerUser(UserData user) throws AlreadyTakenException {
+    public static AuthData registerUser(UserData user) throws AlreadyTakenException, DataAccessException {
         if(USER_DATA_ACCESS.getUser(user.username()) != null) {
             throw new AlreadyTakenException("Username already taken");
         }
@@ -35,7 +35,7 @@ public class UserService {
      * @return an AuthData object for the username
      * @throws IncorrectUsernameOrPasswordException if the username and password don't match
      */
-    public static AuthData loginUser(LoginRequest req) throws IncorrectUsernameOrPasswordException{
+    public static AuthData loginUser(LoginRequest req) throws IncorrectUsernameOrPasswordException, DataAccessException{
         UserData user = USER_DATA_ACCESS.getUser(req.username());
         if(user == null) {
             throw new IncorrectUsernameOrPasswordException("Username doesn't exist");

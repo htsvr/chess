@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import dataobjects.*;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -34,11 +35,13 @@ public class Server {
         try {
             JoinRequest req = serializer.fromJson(ctx.body(), JoinRequest.class);
             if(req.playerColor() == null || req.gameID() <= 0) {
-                throw new Exception();
+                ctx.status(400);
+                ctx.result("{\"message\": \"Error: bad request\"}");
+            } else {
+                GameService.joinGame(new JoinRequest(req.playerColor(), req.gameID(), authToken));
+                ctx.status(200);
+                ctx.result("{}");
             }
-            GameService.joinGame(new JoinRequest(req.playerColor(), req.gameID(), authToken));
-            ctx.status(200);
-            ctx.result("{}");
         } catch (UnrecognizedAuthTokenException e) {
             ctx.status(401);
             ctx.result("{\"message\": \"Error: unauthorized\"}");
@@ -46,8 +49,7 @@ public class Server {
             ctx.status(403);
             ctx.result("{\"message\": \"Error: already taken\"}");
         } catch (Exception e) {
-            ctx.status(400);
-            ctx.result("{\"message\": \"Error: bad request\"}");
+            ctx.status(500);
         }
     }
 
@@ -61,6 +63,8 @@ public class Server {
         } catch (UnrecognizedAuthTokenException e) {
             ctx.status(401);
             ctx.result("{\"message\": \"Error: unauthorized\"}");
+        } catch (Exception e) {
+            ctx.status(500);
         }
     }
 
@@ -79,6 +83,8 @@ public class Server {
                 } catch (UnrecognizedAuthTokenException e) {
                     ctx.status(401);
                     ctx.result("{\"message\": \"Error: unauthorized\"}");
+                } catch (Exception e) {
+                    ctx.status(500);
                 }
             }
         } catch (Exception e){
@@ -101,6 +107,8 @@ public class Server {
             } catch (AlreadyTakenException e) {
                 ctx.status(403);
                 ctx.result("{\"message\": \"Error: already taken\"}");
+            } catch (Exception e) {
+                ctx.status(500);
             }
         }
     }
@@ -119,6 +127,8 @@ public class Server {
             } catch (IncorrectUsernameOrPasswordException e) {
                 ctx.status(401);
                 ctx.result("{\"message\": \"Error: unauthorized\"}");
+            } catch (Exception e) {
+                ctx.status(500);
             }
         }
     }

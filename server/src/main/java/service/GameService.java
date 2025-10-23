@@ -27,7 +27,7 @@ public class GameService {
      * @return a collection all the GameData abjects in the database
      * @throws UnrecognizedAuthTokenException if the auth token is invalid
      */
-    public static Collection<GameData> listGames(String authToken) throws UnrecognizedAuthTokenException{
+    public static Collection<GameData> listGames(String authToken) throws UnrecognizedAuthTokenException, DataAccessException{
         AuthService.validateAuth(authToken);
         return GAME_DATA_ACCESS.getGames();
     }
@@ -39,7 +39,7 @@ public class GameService {
      * @return the gameID of the created game
      * @throws UnrecognizedAuthTokenException if the authToken is invalid.
      */
-    public static int createGame(String gameName, String authToken) throws UnrecognizedAuthTokenException{
+    public static int createGame(String gameName, String authToken) throws UnrecognizedAuthTokenException, DataAccessException{
         AuthService.validateAuth(authToken);
         int gameID = RANDOM_GENERATOR.nextInt(99998)+1;
         while(GAME_DATA_ACCESS.getGame(gameID) != null) {
