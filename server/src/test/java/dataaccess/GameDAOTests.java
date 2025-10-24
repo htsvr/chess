@@ -8,7 +8,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -104,11 +103,11 @@ public class GameDAOTests {
         GameData gameData1 = new GameData(1, "whiteplayer", null, "1st game", game1);
         ChessGame game2 = new ChessGame();
         game2.makeMove(new ChessMove(new ChessPosition(2, 6), new ChessPosition(3, 6), null));
-        GameData gameData2 = new GameData(2, "whiteplayer", "black player", "2nd game", game2);
+        GameData gameData2 = new GameData(1, "whiteplayer", "black player", "2nd game", game2);
 
         dataAccess.createGame(gameData1);
         dataAccess.updateGame(1, gameData2);
-        assertEquals(dataAccess.getGame(1), gameData2);
+        assertEquals(gameData2, dataAccess.getGame(1));
         assertEquals(1, dataAccess.getGames().size());
     }
 
@@ -122,7 +121,7 @@ public class GameDAOTests {
         GameData gameData1 = new GameData(1, "whiteplayer", null, "1st game", game1);
         ChessGame game2 = new ChessGame();
         game2.makeMove(new ChessMove(new ChessPosition(2, 6), new ChessPosition(3, 6), null));
-        GameData gameData2 = new GameData(2, "whiteplayer", "black player", "2nd game", game2);
+        GameData gameData2 = new GameData(1, "whiteplayer", "black player", "2nd game", game2);
 
         dataAccess.createGame(gameData1);
         assertThrows(DataAccessException.class, () -> dataAccess.updateGame(2, gameData2));

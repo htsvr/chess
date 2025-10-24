@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class SQLGameDAO implements GameDAO{
     public SQLGameDAO() throws DataAccessException{
@@ -114,6 +113,28 @@ public class SQLGameDAO implements GameDAO{
 
     @Override
     public void updateGame(int gameID, GameData game) throws DataAccessException {
-
+        try(Connection conn = DatabaseManager.getConnection()) {
+            try(PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM gameTable WHERE gameID = ?")) {
+                preparedStatement.setInt(1, gameID);
+                ResultSet rs = preparedStatement.executeQuery();
+                if(!rs.next()) {
+                    throw new DataAccessException("game doesn't exist");
+                }
+            }
+            String statement = "UPDATE gameTable SET whiteUsername = ?, blackUsername = ?, gameName = ?, game = ?, gameID = ? WHERE gameID = ?";
+            try(PreparedStatement preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, game.whiteUsername());
+                preparedStatement.setString(2, game.blackUsername());
+                preparedStatement.setString(3, game.gameName());
+                Gson serializer = new Gson();
+                String gameJson = serializer.toJson(game.game());
+                preparedStatement.setString(4, gameJson);
+                preparedStatement.setInt(5, game.gameID());
+                preparedStatement.setInt(6, gameID);
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 }
