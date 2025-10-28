@@ -41,7 +41,7 @@ public class UnitTests {
         UserData user = new UserData(username, password, email);
         try {
             UserService.registerUser(user);
-        } catch (AlreadyTakenException _) {
+        } catch (AlreadyTakenException e) {
 
         }
         Assertions.assertThrows(AlreadyTakenException.class, () -> UserService.registerUser(user));

@@ -34,7 +34,7 @@ public class Server {
             UserService.clear();
             AuthService.clear();
             GameService.clear();
-        } catch (DataAccessException _) {
+        } catch (DataAccessException e) {
             ctx.status(500);
             ctx.result("{\"message\": \"Error: something went wrong\"}");
         }
@@ -139,7 +139,7 @@ public class Server {
                 AuthData res = UserService.loginUser(req);
                 ctx.status(200);
                 ctx.result(serializer.toJson(res));
-            } catch (IncorrectUsernameOrPasswordException _) {
+            } catch (IncorrectUsernameOrPasswordException e) {
                 ctx.status(401);
                 ctx.result("{\"message\": \"Error: unauthorized\"}");
             } catch (Exception e) {
