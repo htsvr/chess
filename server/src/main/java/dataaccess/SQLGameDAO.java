@@ -68,13 +68,16 @@ public class SQLGameDAO implements GameDAO{
             try(PreparedStatement preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setInt(1, gameID);
                 ResultSet rs = preparedStatement.executeQuery();
-                rs.next();
-                Gson serializer = new Gson();
-                String whiteUsername = rs.getString(2);
-                String blackUsername = rs.getString(3);
-                String gameName = rs.getString(4);
-                ChessGame gameObj = serializer.fromJson(rs.getString(5), ChessGame.class);
-                return(new GameData(gameID, whiteUsername, blackUsername, gameName, gameObj));
+                if(rs.next()) {
+                    Gson serializer = new Gson();
+                    String whiteUsername = rs.getString(2);
+                    String blackUsername = rs.getString(3);
+                    String gameName = rs.getString(4);
+                    ChessGame gameObj = serializer.fromJson(rs.getString(5), ChessGame.class);
+                    return (new GameData(gameID, whiteUsername, blackUsername, gameName, gameObj));
+                } else {
+                    return null;
+                }
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());

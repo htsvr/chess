@@ -23,10 +23,12 @@ public class UnitTests {
 
     @Test
     @Order(1)
-    public void registerSuccess() {
+    public void registerSuccess() throws Exception{
         String username = "abcdef";
         String password = "password123";
         String email = "ex@example.com";
+        UserService.clear();
+        AuthService.clear();
         Assertions.assertDoesNotThrow(() -> UserService.registerUser(new UserData(username, password, email)));
     }
 
@@ -51,7 +53,7 @@ public class UnitTests {
         String username = "newUsername";
         String password = "password123";
         LoginRequest req = new LoginRequest(username, password);
-        Assertions.assertThrows(DataAccessException.class, () -> UserService.loginUser(req));
+        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> UserService.loginUser(req));
     }
 
     @Test
@@ -107,7 +109,7 @@ public class UnitTests {
         UserService.clear();
         AuthService.clear();
         GameService.clear();
-        Assertions.assertThrows(DataAccessException.class, () -> UserService.loginUser(req));
+        Assertions.assertThrows(IncorrectUsernameOrPasswordException.class, () -> UserService.loginUser(req));
     }
 
     @Test

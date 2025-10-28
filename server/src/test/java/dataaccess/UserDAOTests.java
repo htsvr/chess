@@ -33,7 +33,7 @@ public class UserDAOTests {
         UserDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         String username = "exampleName";
-        assertThrows(DataAccessException.class, () -> dataAccess.getUser(username));
+        assertNull(dataAccess.getUser(username));
     }
 
     @ParameterizedTest
@@ -78,6 +78,6 @@ public class UserDAOTests {
         UserData user = new UserData(username, password, email);
         dataAccess.createUser(user);
         dataAccess.clear();
-        assertThrows(DataAccessException.class, () -> dataAccess.getUser(username));
+        assertNull(dataAccess.getUser(username));
     }
 }

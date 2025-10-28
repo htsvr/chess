@@ -46,8 +46,11 @@ public class SQLAuthDAO implements AuthDAO {
             try(PreparedStatement preparedStatement = conn.prepareStatement("SELECT authToken, username from authTable where authToken = ?")) {
                 preparedStatement.setString(1, authToken);
                 ResultSet rs = preparedStatement.executeQuery();
-                rs.next();
-                return new AuthData(rs.getString(2), authToken);
+                if(rs.next()) {
+                    return new AuthData(rs.getString(2), authToken);
+                } else {
+                    return null;
+                }
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());

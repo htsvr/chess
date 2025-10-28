@@ -2,9 +2,18 @@ package service;
 
 import dataaccess.*;
 import dataobjects.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
-    private static final UserDAO USER_DATA_ACCESS = new MemoryUserDAO();
+    private static final UserDAO USER_DATA_ACCESS;
+
+    static {
+        try {
+            USER_DATA_ACCESS = new SQLUserDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * clears everything in the user data database
@@ -20,12 +29,12 @@ public class UserService {
      * @throws AlreadyTakenException if a user with the given username already exists
      */
     public static AuthData registerUser(UserData user) throws AlreadyTakenException, DataAccessException {
-        try{
-            USER_DATA_ACCESS.getUser(user.username());
-            throw new AlreadyTakenException("Username already taken");
-        } catch (DataAccessException e){
-            USER_DATA_ACCESS.createUser(user);
+        if(USER_DATA_ACCESS.getUser(user.username()) == null) {
+            String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+            USER_DATA_ACCESS.createUser(new UserData(user.username(), hashedPassword, user.email()));
             return AuthService.createAuthToken(user.username());
+        } else {
+            throw new AlreadyTakenException("Username already taken");
         }
     }
 
@@ -41,7 +50,7 @@ public class UserService {
         if(user == null) {
             throw new IncorrectUsernameOrPasswordException("Username doesn't exist");
         }
-        if(!user.password().equals(req.password())) {
+        if(!BCrypt.checkpw(req.password(), user.password())) {
             throw new IncorrectUsernameOrPasswordException("Incorrect Username or Password");
         }
         return AuthService.createAuthToken(req.username());

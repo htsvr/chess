@@ -19,14 +19,25 @@ public class Server {
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
-        server.delete("db", ctx -> {
-            UserService.clear(); AuthService.clear(); GameService.clear();});
+        server.delete("db", this::clear);
         server.post("user", this::register);
         server.post("session", this::login);
         server.delete("session", this::logout);
         server.get("game", this::listGames);
         server.post("game", this::createGame);
         server.put("game", this::joinGame);
+    }
+
+    private void clear(Context ctx) {
+        try{
+            //AuthService.validateAuth(ctx.header("Authorization"));
+            UserService.clear();
+            AuthService.clear();
+            GameService.clear();
+        } catch (DataAccessException _) {
+            ctx.status(500);
+            ctx.result("{\"message\": \"Error: something went wrong\"}");
+        }
     }
 
     private void joinGame(Context ctx) {
@@ -50,6 +61,7 @@ public class Server {
             ctx.result("{\"message\": \"Error: already taken\"}");
         } catch (Exception e) {
             ctx.status(500);
+            ctx.result("{\"message\": \"Error: something went wrong\"}");
         }
     }
 
@@ -65,6 +77,7 @@ public class Server {
             ctx.result("{\"message\": \"Error: unauthorized\"}");
         } catch (Exception e) {
             ctx.status(500);
+            ctx.result("{\"message\": \"Error: something went wrong\"}");
         }
     }
 
@@ -85,6 +98,7 @@ public class Server {
                     ctx.result("{\"message\": \"Error: unauthorized\"}");
                 } catch (Exception e) {
                     ctx.status(500);
+                    ctx.result("{\"message\": \"Error: something went wrong\"}");
                 }
             }
         } catch (Exception e){
@@ -109,6 +123,7 @@ public class Server {
                 ctx.result("{\"message\": \"Error: already taken\"}");
             } catch (Exception e) {
                 ctx.status(500);
+                ctx.result("{\"message\": \"Error: something went wrong\"}");
             }
         }
     }
@@ -124,11 +139,12 @@ public class Server {
                 AuthData res = UserService.loginUser(req);
                 ctx.status(200);
                 ctx.result(serializer.toJson(res));
-            } catch (IncorrectUsernameOrPasswordException | DataAccessException e) {
+            } catch (IncorrectUsernameOrPasswordException _) {
                 ctx.status(401);
                 ctx.result("{\"message\": \"Error: unauthorized\"}");
             } catch (Exception e) {
                 ctx.status(500);
+                ctx.result("{\"message\": \"Error: something went wrong\"}");
             }
         }
     }
@@ -144,6 +160,7 @@ public class Server {
             ctx.result("{\"message\": \"Error: unauthorized\"}");
         } catch (Exception e) {
             ctx.status(500);
+            ctx.result("{\"message\": \"Error: something went wrong\"}");
         }
     }
 

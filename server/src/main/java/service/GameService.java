@@ -1,9 +1,7 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryGameDAO;
-import dataaccess.GameDAO;
+import dataaccess.*;
 import dataobjects.GameData;
 import dataobjects.JoinRequest;
 
@@ -11,7 +9,16 @@ import java.util.Collection;
 import java.util.Random;
 
 public class GameService {
-    private static final GameDAO GAME_DATA_ACCESS = new MemoryGameDAO();
+    private static final GameDAO GAME_DATA_ACCESS;
+
+    static {
+        try {
+            GAME_DATA_ACCESS = new SQLGameDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static final Random RANDOM_GENERATOR = new Random();
 
     /**
@@ -42,15 +49,10 @@ public class GameService {
     public static int createGame(String gameName, String authToken) throws UnrecognizedAuthTokenException, DataAccessException{
         AuthService.validateAuth(authToken);
         int gameID = RANDOM_GENERATOR.nextInt(99998)+1;
-        while(true) {
-            try{
-                GAME_DATA_ACCESS.getGame(gameID);
-                gameID = RANDOM_GENERATOR.nextInt(99998)+1;
-            } catch (DataAccessException _) {
-                GAME_DATA_ACCESS.createGame(new GameData(gameID, null, null, gameName, new ChessGame()));
-                break;
-            }
+        while(GAME_DATA_ACCESS.getGame(gameID) != null) {
+            gameID = RANDOM_GENERATOR.nextInt(99998)+1;
         }
+        GAME_DATA_ACCESS.createGame(new GameData(gameID, null, null, gameName, new ChessGame()));
         return gameID;
     }
 

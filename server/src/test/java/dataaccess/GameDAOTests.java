@@ -56,7 +56,7 @@ public class GameDAOTests {
         ChessGame game1 = new ChessGame();
         GameData gameData1 = new GameData(1, "whiteplayer", null, "1st game", game1);
         dataAccess.createGame(gameData1);
-        assertThrows(DataAccessException.class, () -> dataAccess.getGame(2));
+        assertNull(dataAccess.getGame(2));
     }
 
     @ParameterizedTest
@@ -90,7 +90,7 @@ public class GameDAOTests {
         GameData gameData1 = new GameData(1, "whiteplayer", null, "1st game", game1);
         dataAccess.createGame(gameData1);
         dataAccess.clear();
-        assertThrows(DataAccessException.class, () -> dataAccess.getGame(1));
+        assertNull(dataAccess.getGame(1));
     }
 
     @ParameterizedTest
@@ -126,6 +126,6 @@ public class GameDAOTests {
         dataAccess.createGame(gameData1);
         assertThrows(DataAccessException.class, () -> dataAccess.updateGame(2, gameData2));
         assertEquals(gameData1, dataAccess.getGame(1));
-        assertThrows(DataAccessException.class, () -> dataAccess.getGame(2));
+        assertNull(dataAccess.getGame(2));
     }
 }

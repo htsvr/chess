@@ -34,8 +34,13 @@ public class SQLUserDAO implements UserDAO{
             try(PreparedStatement preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, username);
                 ResultSet rs = preparedStatement.executeQuery();
-                rs.next();
-                return(new UserData(rs.getString(1), rs.getString(3), rs.getString(2)));
+                if (rs.next()) {
+                    String email = rs.getString(2);
+                    String password = rs.getString(3);
+                    return (new UserData(username, password, email));
+                } else {
+                    return null;
+                }
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());

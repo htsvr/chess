@@ -46,7 +46,7 @@ public class AuthDAOTests {
         AuthData data = new AuthData(user, authToken);
         dataAccess.createAuth(data);
         dataAccess.clear();
-        assertThrows(DataAccessException.class, () -> dataAccess.getAuth(authToken));
+        assertNull(dataAccess.getAuth(authToken));
     }
 
     @ParameterizedTest
@@ -75,7 +75,7 @@ public class AuthDAOTests {
         dataAccess.clear();
         String authToken = UUID.randomUUID().toString();
 
-        assertThrows(DataAccessException.class, () -> dataAccess.getAuth(authToken));
+        assertNull(dataAccess.getAuth(authToken));
     }
 
     @ParameterizedTest
@@ -88,7 +88,7 @@ public class AuthDAOTests {
         AuthData data = new AuthData(user, authToken);
         dataAccess.createAuth(data);
         dataAccess.deleteAuth(data);
-        assertThrows(DataAccessException.class, () -> dataAccess.getAuth(authToken));
+        assertNull(dataAccess.getAuth(authToken));
     }
 
     @ParameterizedTest
