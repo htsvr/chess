@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GameDAOTests {
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
-    public void getGamesSuccess(Class<? extends GameDAO> DAOClass) throws Exception {
-        GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void getGamesSuccess(Class<? extends GameDAO> daoClass) throws Exception {
+        GameDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         ArrayList<GameData> games = new ArrayList<>();
         ChessGame game1 = new ChessGame();
         game1.makeMove(new ChessMove(new ChessPosition(2, 4), new ChessPosition(4, 4), null));
@@ -33,8 +33,8 @@ public class GameDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
-    public void getGameSuccess(Class<? extends GameDAO> DAOClass) throws Exception {
-        GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void getGameSuccess(Class<? extends GameDAO> daoClass) throws Exception {
+        GameDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         ChessGame game1 = new ChessGame();
         game1.makeMove(new ChessMove(new ChessPosition(2, 4), new ChessPosition(4, 4), null));
@@ -50,8 +50,8 @@ public class GameDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
-    public void getGameFailure(Class<? extends GameDAO> DAOClass) throws Exception {
-        GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void getGameFailure(Class<? extends GameDAO> daoClass) throws Exception {
+        GameDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         ChessGame game1 = new ChessGame();
         GameData gameData1 = new GameData(1, "whiteplayer", null, "1st game", game1);
@@ -61,8 +61,8 @@ public class GameDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
-    public void createGameSuccess(Class<? extends GameDAO> DAOClass) throws Exception {
-        GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void createGameSuccess(Class<? extends GameDAO> daoClass) throws Exception {
+        GameDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         ChessGame game1 = new ChessGame();
         GameData gameData1 = new GameData(1, "whiteplayer", null, "1st game", game1);
@@ -72,8 +72,8 @@ public class GameDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
-    public void createGameFailure(Class<? extends GameDAO> DAOClass) throws Exception {
-        GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void createGameFailure(Class<? extends GameDAO> daoClass) throws Exception {
+        GameDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         ChessGame game1 = new ChessGame();
         GameData gameData1 = new GameData(1, "whiteplayer", null, "1st game", game1);
@@ -83,8 +83,8 @@ public class GameDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
-    public void clearSuccess(Class<? extends GameDAO> DAOClass) throws Exception {
-        GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void clearSuccess(Class<? extends GameDAO> daoClass) throws Exception {
+        GameDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         ChessGame game1 = new ChessGame();
         GameData gameData1 = new GameData(1, "whiteplayer", null, "1st game", game1);
@@ -95,8 +95,8 @@ public class GameDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
-    public void updateGameSuccess(Class<? extends GameDAO> DAOClass) throws Exception {
-        GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void updateGameSuccess(Class<? extends GameDAO> daoClass) throws Exception {
+        GameDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         ChessGame game1 = new ChessGame();
         game1.makeMove(new ChessMove(new ChessPosition(2, 4), new ChessPosition(4, 4), null));
@@ -113,8 +113,8 @@ public class GameDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
-    public void updateGameFailure(Class<? extends GameDAO> DAOClass) throws Exception {
-        GameDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void updateGameFailure(Class<? extends GameDAO> daoClass) throws Exception {
+        GameDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         ChessGame game1 = new ChessGame();
         game1.makeMove(new ChessMove(new ChessPosition(2, 4), new ChessPosition(4, 4), null));

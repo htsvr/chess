@@ -12,8 +12,8 @@ public class AuthDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
-    public void createAuthSuccess(Class<? extends AuthDAO> DAOClass) throws Exception {
-        AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void createAuthSuccess(Class<? extends AuthDAO> daoClass) throws Exception {
+        AuthDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         String user = "testUser";
         String authToken = UUID.randomUUID().toString();
@@ -24,8 +24,8 @@ public class AuthDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
-    public void createAuthFailure(Class<? extends AuthDAO> DAOClass) throws Exception {
-        AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void createAuthFailure(Class<? extends AuthDAO> daoClass) throws Exception {
+        AuthDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         String user = "testUser";
         String authToken = UUID.randomUUID().toString();
@@ -39,8 +39,8 @@ public class AuthDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
-    public void clearSuccess(Class<? extends AuthDAO> DAOClass) throws Exception {
-        AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void clearSuccess(Class<? extends AuthDAO> daoClass) throws Exception {
+        AuthDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         String user = "testUser";
         String authToken = UUID.randomUUID().toString();
         AuthData data = new AuthData(user, authToken);
@@ -51,8 +51,8 @@ public class AuthDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
-    public void getAuthSuccess(Class<? extends AuthDAO> DAOClass) throws Exception {
-        AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void getAuthSuccess(Class<? extends AuthDAO> daoClass) throws Exception {
+        AuthDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         String user1 = "testUser1";
         String authToken1 = UUID.randomUUID().toString();
@@ -70,8 +70,8 @@ public class AuthDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
-    public void getAuthFailure(Class<? extends AuthDAO> DAOClass) throws Exception {
-        AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void getAuthFailure(Class<? extends AuthDAO> daoClass) throws Exception {
+        AuthDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         String authToken = UUID.randomUUID().toString();
 
@@ -80,8 +80,8 @@ public class AuthDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
-    public void deleteAuthSuccess(Class<? extends AuthDAO> DAOClass) throws Exception {
-        AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void deleteAuthSuccess(Class<? extends AuthDAO> daoClass) throws Exception {
+        AuthDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         String user = "testUser";
         String authToken = UUID.randomUUID().toString();
@@ -93,8 +93,8 @@ public class AuthDAOTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
-    public void deleteAuthFailure(Class<? extends AuthDAO> DAOClass) throws Exception {
-        AuthDAO dataAccess = DAOClass.getDeclaredConstructor().newInstance();
+    public void deleteAuthFailure(Class<? extends AuthDAO> daoClass) throws Exception {
+        AuthDAO dataAccess = daoClass.getDeclaredConstructor().newInstance();
         dataAccess.clear();
         String user = "testUser";
         String authToken = UUID.randomUUID().toString();
