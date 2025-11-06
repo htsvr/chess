@@ -1,4 +1,5 @@
 import chess.*;
+import ui.ChessClient;
 
 public class Main {
     public static void main(String[] args) {
@@ -14,5 +15,8 @@ public class Main {
         System.out.println(board);
         System.out.println(board2);
         System.out.println(board.equals(board2));
+        String serverUrl = "http://localhost:8080";
+        ChessClient client = new ChessClient(serverUrl);
+        client.run();
     }
 }
