@@ -1,5 +1,5 @@
 package ui;
-import dataobjects.UserData;
+import dataobjects.*;
 import server.ServerFacade;
 
 import java.util.Arrays;
@@ -8,10 +8,12 @@ import java.util.Scanner;
 public class ChessClient {
     private State state;
     private final ServerFacade server;
+    private AuthData auth;
 
     public ChessClient(String serverUrl) {
         state = State.SIGNEDOUT;
         server = new ServerFacade(serverUrl);
+        auth = null;
     }
 
     public void run() {
@@ -51,7 +53,11 @@ public class ChessClient {
         } else {
             UserData user = new UserData(params[0], params[2], params[1]);
             try{
-                server.registerUser(user);
+                auth = server.registerUser(user);
+                if(auth != null) {
+                    state = State.SIGNEDIN;
+                    return "Registered user";
+                }
             } catch (Exception e){
                 return "Something went wrong";
             }

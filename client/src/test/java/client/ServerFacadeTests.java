@@ -1,18 +1,27 @@
 package client;
 
+import dataobjects.AuthData;
+import dataobjects.LoginRequest;
+import dataobjects.UserData;
 import org.junit.jupiter.api.*;
+import server.ResponseException;
 import server.Server;
+import server.ServerFacade;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServerFacadeTests {
 
     private static Server server;
+    private static ServerFacade sf;
 
     @BeforeAll
     public static void init() {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
+        sf = new ServerFacade("http://localhost:" + port);
     }
 
     @AfterAll
@@ -26,4 +35,79 @@ public class ServerFacadeTests {
         Assertions.assertTrue(true);
     }
 
+    @Test void clearSuccessTest() throws Exception {
+        UserData user = new UserData("testUser75", "test75@Email.com", "testPassword75");
+        sf.clear();
+        sf.registerUser(user);
+        sf.clear();
+        sf.registerUser(user);
+    }
+
+    @Test
+    public void registerSuccessTest() throws Exception{
+        sf.clear();
+        UserData user = new UserData("testUser", "test@Email.com", "testPassword");
+        AuthData result = sf.registerUser(user);
+        assertEquals(user.username(), result.username());
+    }
+
+    @Test
+    public void registerFailureTest() throws Exception{
+        sf.clear();
+        UserData user = new UserData("testUser", "test@Email.com", "testPassword");
+        sf.registerUser(user);
+        UserData user2 = new UserData("testUser", "test2@Email.com", "testPassword2");
+        assertThrows(ResponseException.class, () -> sf.registerUser(user2));
+    }
+
+    @Test
+    public void loginSuccessTest() throws Exception{
+        sf.clear();
+        String username = "test435";
+        String email = "exp23@test.com";
+        String password = "PA$$WORD!";
+        sf.registerUser(new UserData(username, password, email));
+        AuthData result = sf.login(new LoginRequest(username, password));
+        assertEquals(username, result.username());
+    }
+
+    @Test
+    public void loginFailureTest() throws Exception{
+        sf.clear();
+        String username = "test435";
+        String password = "PA$$WORD!";
+        assertThrows(ResponseException.class, () -> sf.login(new LoginRequest(username, password)));
+    }
+
+    @Test
+    public void logoutSuccessTest() throws Exception{
+        sf.clear();
+        String username = "test454";
+        String email = "exp454@test.com";
+        String password = "PA$$WORD!454";
+        AuthData auth = sf.registerUser(new UserData(username, password, email));
+        assertDoesNotThrow(() -> sf.logout(auth.authToken()));
+    }
+
+    @Test
+    public void logoutFailureTest() throws Exception{
+        sf.clear();
+        String username = "test454";
+        String email = "exp454@test.com";
+        String password = "PA$$WORD!454";
+        AuthData auth = sf.registerUser(new UserData(username, password, email));
+        sf.logout(auth.authToken());
+        assertThrows(ResponseException.class, () -> sf.logout(auth.authToken()));
+    }
+
+    @Test
+    public void createGameSuccess() throws Exception{
+        sf.clear();
+        String username = "test454";
+        String email = "exp454@test.com";
+        String password = "PA$$WORD!454";
+        AuthData auth = sf.registerUser(new UserData(username, password, email));
+        int gameID = sf.createGame("testGame1", auth.authToken());
+        assertNotEquals(0, gameID);
+    }
 }
