@@ -9,12 +9,12 @@ import java.util.Scanner;
 
 public class ChessClient {
     private State state;
-    private final ServerFacade server;
+    private final ServerFacade serverFacade;
     private AuthData auth;
 
     public ChessClient(String serverUrl) {
         state = State.SIGNEDOUT;
-        server = new ServerFacade(serverUrl);
+        serverFacade = new ServerFacade(serverUrl);
         auth = null;
     }
 
@@ -44,6 +44,7 @@ public class ChessClient {
         return switch (cmd){
             case "register" -> register(params);
             case "login" -> login(params);
+            case "logout" -> logout();
             case "quit" -> "quit";
             default -> help();
         };
@@ -55,7 +56,7 @@ public class ChessClient {
         } else {
             UserData user = new UserData(params[0], params[2], params[1]);
             try{
-                auth = server.registerUser(user);
+                auth = serverFacade.registerUser(user);
                 if(auth != null) {
                     state = State.SIGNEDIN;
                     return "Registered user\n\n" + help();
@@ -84,7 +85,7 @@ public class ChessClient {
         } else {
             LoginRequest user = new LoginRequest(params[0], params[1]);
             try{
-                auth = server.login(user);
+                auth = serverFacade.login(user);
                 if(auth != null) {
                     state = State.SIGNEDIN;
                     return "Logged in\n\n" + help();
@@ -103,6 +104,24 @@ public class ChessClient {
                 } else {
                     return "Something went wrong";
                 }
+            }
+        }
+    }
+
+    public String logout() {
+        try {
+            serverFacade.logout(auth.authToken());
+            state = State.SIGNEDOUT;
+            return "Successfully logged out" + help();
+        } catch (IOException | InterruptedException e){
+            return "Something went wrong with the connection, please try again later";
+        } catch (ResponseException e) {
+            if(e.statusCode() / 100 == 5) {
+                return "Something went wrong with the server, please try again later";
+            } else if (e.statusCode() == 401) {
+                return "Invalid auth token";
+            } else {
+                return "Something went wrong";
             }
         }
     }
