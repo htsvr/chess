@@ -16,7 +16,7 @@ public class ChessClient {
     private State state;
     private final ServerFacade serverFacade;
     private AuthData auth;
-    private Map<Integer, Integer> gameLookup;
+    private final Map<Integer, Integer> gameLookup;
 
     public ChessClient(String serverUrl) {
         state = State.SIGNEDOUT;
@@ -26,6 +26,7 @@ public class ChessClient {
     }
 
     public void run() {
+        System.out.println("♕ 240 Chess Client: ");
         System.out.println(" Welcome to chess. Sign in to start.");
         System.out.println(help());
 
@@ -296,12 +297,15 @@ public class ChessClient {
                 resultGame = game.game();
             }
         }
-        return getBoardString(resultGame.getBoard(), color);
+        if(resultGame != null) {
+            return getBoardString(resultGame.getBoard(), color);
+        }
+        return "Could not retrieve game";
     }
 
     public String getBoardString(ChessBoard board, ChessGame.TeamColor teamColor) {
         StringBuilder result = new StringBuilder();
-        boolean whiteTile = true;
+        boolean whiteTile;
         int[] rows, cols;
         if (teamColor == ChessGame.TeamColor.WHITE){
             rows = new int[]{7, 6, 5, 4, 3, 2, 1, 0};
@@ -341,19 +345,18 @@ public class ChessClient {
                         result.append(SET_TEXT_COLOR_DARK_GREY);
                     }
                     switch(piece.getPieceType()){
-                        case ChessPiece.PieceType.PAWN -> {
+                        case ChessPiece.PieceType.PAWN ->
                             result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_PAWN: BLACK_PAWN);
-                        } case ChessPiece.PieceType.KING -> {
+                        case ChessPiece.PieceType.KING ->
                             result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_KING: BLACK_KING);
-                        } case ChessPiece.PieceType.QUEEN -> {
+                        case ChessPiece.PieceType.QUEEN ->
                             result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_QUEEN: BLACK_QUEEN);
-                        } case ChessPiece.PieceType.BISHOP -> {
+                        case ChessPiece.PieceType.BISHOP ->
                             result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_BISHOP: BLACK_BISHOP);
-                        } case ChessPiece.PieceType.KNIGHT -> {
+                        case ChessPiece.PieceType.KNIGHT ->
                             result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_KNIGHT: BLACK_KNIGHT);
-                        } case ChessPiece.PieceType.ROOK -> {
+                        case ChessPiece.PieceType.ROOK ->
                             result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_ROOK: BLACK_ROOK);
-                        }
                     }
                 }
             }
