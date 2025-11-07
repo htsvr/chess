@@ -10,7 +10,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,7 +53,7 @@ public class ServerFacade {
         }
     }
 
-    public Collection<GameData> listGames(String authToken) throws IOException, InterruptedException, ResponseException {
+    public ArrayList<GameData> listGames(String authToken) throws IOException, InterruptedException, ResponseException {
         HttpResponse<String> res = request("/game", "GET", null, authToken);
         if (res.statusCode()/100 == 2){
             Map<String, ArrayList<GameData>> result = new Gson().fromJson(res.body(), new TypeToken<Map<String, ArrayList<GameData>>>(){}.getType());
