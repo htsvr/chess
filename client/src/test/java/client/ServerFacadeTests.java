@@ -110,4 +110,15 @@ public class ServerFacadeTests {
         int gameID = sf.createGame("testGame1", auth.authToken());
         assertNotEquals(0, gameID);
     }
+
+    @Test
+    public void createGameFailure() throws Exception{
+        sf.clear();
+        String username = "test454";
+        String email = "exp454@test.com";
+        String password = "PA$$WORD!454";
+        AuthData auth = sf.registerUser(new UserData(username, password, email));
+        sf.logout(auth.authToken());
+        assertThrows(ResponseException.class, () -> sf.createGame("testGame1", auth.authToken()));
+    }
 }

@@ -1,6 +1,5 @@
 package server;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import dataobjects.AuthData;
@@ -15,6 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ServerFacade {
@@ -67,10 +67,12 @@ public class ServerFacade {
     }
 
     public int createGame(String gameName, String authToken) throws IOException, InterruptedException, ResponseException {
-        HttpResponse<String> res = request("/game", "GET", null, authToken);
+        Map<String, String> body = new HashMap<>();
+        body.put("gameName", gameName);
+        HttpResponse<String> res = request("/game", "POST", body, authToken);
         if (res.statusCode()/100 == 2){
             Map<String, Integer> result = new Gson().fromJson(res.body(), new TypeToken<Map<String, Integer>>(){}.getType());
-            return result.get("gameName");
+            return result.get("gameID");
         } else {
             throw new ResponseException(res);
         }
