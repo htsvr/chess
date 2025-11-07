@@ -2,10 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import dataobjects.AuthData;
-import dataobjects.GameData;
-import dataobjects.LoginRequest;
-import dataobjects.UserData;
+import dataobjects.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -60,7 +57,8 @@ public class ServerFacade {
     public Collection<GameData> listGames(String authToken) throws IOException, InterruptedException, ResponseException {
         HttpResponse<String> res = request("/game", "GET", null, authToken);
         if (res.statusCode()/100 == 2){
-            return new Gson().fromJson(res.body(), new TypeToken<ArrayList<GameData>>(){}.getType());
+            Map<String, ArrayList<GameData>> result = new Gson().fromJson(res.body(), new TypeToken<Map<String, ArrayList<GameData>>>(){}.getType());
+            return result.get("games");
         } else {
             throw new ResponseException(res);
         }
@@ -89,5 +87,12 @@ public class ServerFacade {
             req.setHeader("Authorization", authToken);
         }
         return client.send(req.build(), HttpResponse.BodyHandlers.ofString());
+    }
+
+    public void joinGame(JoinRequest req) throws IOException, InterruptedException, ResponseException {
+        HttpResponse<String> res = request("/game", "PUT", req, req.authToken());
+        if (res.statusCode()/100 != 2){
+            throw new ResponseException(res);
+        }
     }
 }

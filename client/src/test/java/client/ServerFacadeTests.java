@@ -1,12 +1,14 @@
 package client;
 
-import dataobjects.AuthData;
-import dataobjects.LoginRequest;
-import dataobjects.UserData;
+import chess.ChessGame;
+import dataobjects.*;
 import org.junit.jupiter.api.*;
 import server.ResponseException;
 import server.Server;
 import server.ServerFacade;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -120,5 +122,57 @@ public class ServerFacadeTests {
         AuthData auth = sf.registerUser(new UserData(username, password, email));
         sf.logout(auth.authToken());
         assertThrows(ResponseException.class, () -> sf.createGame("testGame1", auth.authToken()));
+    }
+
+    @Test
+    public void listGamesSuccess() throws Exception{
+        sf.clear();
+        String username = "test454";
+        String email = "exp454@test.com";
+        String password = "PA$$WORD!454";
+        String gameName = "testGame1";
+        AuthData auth = sf.registerUser(new UserData(username, password, email));
+        int gameID = sf.createGame(gameName, auth.authToken());
+        Collection<GameData> gameList = sf.listGames(auth.authToken());
+        Collection<GameData> expectedGameList = new ArrayList<>();
+        expectedGameList.add(new GameData(gameID, null, null, gameName, new ChessGame()));
+        assertArrayEquals(expectedGameList.toArray(), gameList.toArray());
+    }
+
+    @Test
+    public void listGamesFailure() throws Exception{
+        sf.clear();
+        String username = "test454";
+        String email = "exp454@test.com";
+        String password = "PA$$WORD!454";
+        String gameName = "testGame1";
+        AuthData auth = sf.registerUser(new UserData(username, password, email));
+        sf.logout(auth.authToken());
+        assertThrows(ResponseException.class, () -> sf.createGame(gameName, auth.authToken()));
+    }
+
+    @Test
+    public void joinGameSuccess() throws Exception{
+        sf.clear();
+        String username = "test454";
+        String email = "exp454@test.com";
+        String password = "PA$$WORD!454";
+        AuthData auth = sf.registerUser(new UserData(username, password, email));
+        int gameID = sf.createGame("testGame1", auth.authToken());
+        sf.joinGame(new JoinRequest(ChessGame.TeamColor.WHITE, gameID, auth.authToken()));
+        assertEquals(username, sf.listGames(auth.authToken()).iterator().next().whiteUsername());
+    }
+
+    @Test
+    public void joinGameFailure() throws Exception{
+        sf.clear();
+        String username = "test454";
+        String email = "exp454@test.com";
+        String password = "PA$$WORD!454";
+        AuthData auth = sf.registerUser(new UserData(username, password, email));
+        int gameID = sf.createGame("testGame1", auth.authToken());
+        JoinRequest req = new JoinRequest(ChessGame.TeamColor.WHITE, gameID, auth.authToken());
+        sf.joinGame(req);
+        assertThrows(ResponseException.class, () -> sf.joinGame(req));
     }
 }
