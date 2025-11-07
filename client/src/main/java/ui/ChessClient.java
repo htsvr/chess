@@ -1,7 +1,9 @@
 package ui;
 import dataobjects.*;
+import server.ResponseException;
 import server.ServerFacade;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -22,7 +24,7 @@ public class ChessClient {
 
         Scanner scanner = new Scanner(System.in);
         String result = "";
-        while (result != "quit") {
+        while (!result.equals("quit")) {
             System.out.print("\n>>>");
             String line = scanner.nextLine();
 
@@ -56,17 +58,53 @@ public class ChessClient {
                 auth = server.registerUser(user);
                 if(auth != null) {
                     state = State.SIGNEDIN;
-                    return "Registered user";
+                    return "Registered user\n\n" + help();
+                } else {
+                    return "Something went wrong, please try again later";
                 }
-            } catch (Exception e){
-                return "Something went wrong";
+            } catch (IOException | InterruptedException e){
+                return "Something went wrong with the connection, please try again later";
+            } catch (ResponseException e) {
+                if(e.statusCode() / 100 == 5) {
+                    return "Something went wrong with the server, please try again later";
+                } else if (e.statusCode() == 400) {
+                    return "please register using the form 'register [username] [email] [password]'";
+                } else if (e.statusCode() == 403) {
+                    return "Username already in use, please pick a different username";
+                } else {
+                    return "Something went wrong";
+                }
             }
         }
-        return null;
     }
 
     public String login(String[] params) {
-        return null;
+        if (params.length != 2) {
+            return "please login using the form 'login [username] [password]'";
+        } else {
+            LoginRequest user = new LoginRequest(params[0], params[1]);
+            try{
+                auth = server.login(user);
+                if(auth != null) {
+                    state = State.SIGNEDIN;
+                    return "Logged in\n\n" + help();
+                } else {
+                    return "Something went wrong, please try again later";
+                }
+            } catch (IOException | InterruptedException e){
+                return "Something went wrong with the connection, please try again later";
+            } catch (ResponseException e) {
+                if(e.statusCode() / 100 == 5) {
+                    return "Something went wrong with the server, please try again later";
+                } else if (e.statusCode() == 400) {
+                    return "please register using the form 'register [username] [email] [password]'";
+                } else if (e.statusCode() == 401) {
+                    return "Incorrect username or password";
+                } else {
+                    return "Something went wrong";
+                }
+            }
+        }
     }
 
     public String help() {
