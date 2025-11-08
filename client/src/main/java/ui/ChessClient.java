@@ -129,19 +129,25 @@ public class ChessClient {
             serverFacade.logout(auth.authToken());
             state = State.SIGNED_OUT;
             return "Successfully logged out";
-        } catch (IOException | InterruptedException e){
+        } catch (Exception e) {
+            return basicErrorHandling(e);
+        }
+    }
+
+    private String basicErrorHandling(Exception e) {
+        if (e.getClass() == IOException.class || e.getClass() == InterruptedException.class){
             return "Something went wrong with the connection, please try again later";
-        } catch (ResponseException e) {
-            if(e.statusCode() / 100 == 5) {
+        } else if (e.getClass() == ResponseException.class){
+            if(((ResponseException) e).statusCode() / 100 == 5) {
                 return "Something went wrong with the server, please try again later";
-            } else if (e.statusCode() == 401) {
+            } else if (((ResponseException) e).statusCode() == 401) {
                 return "You are not authorized to perform this action";
             } else {
                 return "Something went wrong";
             }
-        } catch (NullPointerException e) {
+        } else if (e.getClass() == NullPointerException.class){
             return "You are not authorized to perform this action";
-        } catch (Exception e) {
+        } else {
             return "Something went wrong";
         }
     }
@@ -182,25 +188,16 @@ public class ChessClient {
                     .append("\n");
             for (int i = 1; i <= gameList.size(); i ++) {
                 GameData game = gameList.get(i - 1);
-                result.append(String.format("%-5d%-20s%-20s%-20s", i, game.gameName(), game.whiteUsername() == null ? "": game.whiteUsername(), game.blackUsername() == null ? "": game.blackUsername()))
+                String name = game.gameName();
+                String whiteUsername = game.whiteUsername() == null ? "": game.whiteUsername();
+                String blackUsername = game.blackUsername() == null ? "": game.blackUsername();
+                result.append(String.format("%-5d%-20s%-20s%-20s", i, name, whiteUsername, blackUsername))
                         .append("\n");
                 gameLookup.put(i, gameList.get(i-1).gameID());
             }
             return result.toString();
-        } catch (IOException | InterruptedException e){
-            return "Something went wrong with the connection, please try again later";
-        } catch (ResponseException e) {
-            if(e.statusCode() / 100 == 5) {
-                return "Something went wrong with the server, please try again later";
-            } else if (e.statusCode() == 401) {
-                return "You are not authorized to perform this action";
-            } else {
-                return "Something went wrong";
-            }
-        } catch (NullPointerException e) {
-            return "You are not authorized to perform this action";
         } catch (Exception e) {
-            return "Something went wrong";
+            return basicErrorHandling(e);
         }
     }
 
