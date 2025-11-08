@@ -3,9 +3,7 @@ package client;
 import chess.ChessGame;
 import dataobjects.*;
 import org.junit.jupiter.api.*;
-import server.ResponseException;
 import server.Server;
-import server.ServerFacade;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -160,7 +158,7 @@ public class ServerFacadeTests {
         AuthData auth = sf.registerUser(new UserData(username, password, email));
         int gameID = sf.createGame("testGame1", auth.authToken());
         sf.joinGame(new JoinRequest(ChessGame.TeamColor.WHITE, gameID, auth.authToken()));
-        assertEquals(username, sf.listGames(auth.authToken()).iterator().next().whiteUsername());
+        assertEquals(username, sf.listGames(auth.authToken()).getFirst().whiteUsername());
     }
 
     @Test

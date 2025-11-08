@@ -4,8 +4,8 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import dataobjects.*;
-import server.ResponseException;
-import server.ServerFacade;
+import client.ResponseException;
+import client.ServerFacade;
 
 import java.io.IOException;
 import java.util.*;
