@@ -16,7 +16,7 @@ public class ChessClient {
     private State state;
     private final ServerFacade serverFacade;
     private AuthData auth;
-    private final Map<String, Integer> gameLookup;
+    private final Map<Integer, Integer> gameLookup;
 
     public ChessClient(String serverUrl) {
         state = State.SIGNED_OUT;
@@ -182,7 +182,7 @@ public class ChessClient {
         try {
             ArrayList<GameData> gameList = serverFacade.listGames(auth.authToken());
             StringBuilder result = new StringBuilder();
-            result.append(String.format("%-5s%-20s%-20s%-20s", "", "game name", "white player", "black player"))
+            result.append(String.format("%-5s%-20s%-20s%-20s", "id", "game name", "white player", "black player"))
                     .append("\n")
                     .append("-".repeat(65))
                     .append("\n");
@@ -193,7 +193,7 @@ public class ChessClient {
                 String blackUsername = game.blackUsername() == null ? "": game.blackUsername();
                 result.append(String.format("%-5d%-20s%-20s%-20s", i, name, whiteUsername, blackUsername))
                         .append("\n");
-                gameLookup.put(gameList.get(i-1).gameName(), gameList.get(i-1).gameID());
+                gameLookup.put(i, gameList.get(i-1).gameID());
             }
             return result.toString();
         } catch (Exception e) {
@@ -202,16 +202,16 @@ public class ChessClient {
     }
 
     public String joinGame(String[] params) {
-        if (params.length != 2 || !(params[1].equals("white") || params[1].equals("black"))) {
-            return "Please join a game using the form 'join <GAME NAME> [WHITE|BLACK]'";
+        if (params.length != 2 || !params[0].matches("\\d+") || !(params[1].equals("white") || params[1].equals("black"))) {
+            return "Please join a game using the form 'join <GAME ID> [WHITE|BLACK]'";
         }
         try {
             ChessGame.TeamColor color = params[1].equals("white") ? ChessGame.TeamColor.WHITE: ChessGame.TeamColor.BLACK;
-            String gameName = params[0];
-            if(!gameLookup.containsKey(gameName)){
-                return "Invalid game number";
+            int gameNumber = Integer.parseInt(params[0]);
+            if(!gameLookup.containsKey(gameNumber)){
+                return "Invalid game id";
             }
-            int gameID = gameLookup.get(gameName);
+            int gameID = gameLookup.get(gameNumber);
             serverFacade.joinGame(new JoinRequest(color, gameID, auth.authToken()));
             return getGameString(gameID, color);
         } catch (IOException | InterruptedException e){
@@ -236,15 +236,15 @@ public class ChessClient {
     }
 
     public String observeGame(String[] params) {
-        if (params.length != 1) {
+        if (params.length != 1 || !params[0].matches("\\d+")) {
             return "Please observe a game using the form 'observe <ID>'";
         }
         try {
-            String gameName = params[0];
-            if(!gameLookup.containsKey(gameName)){
-                return "Invalid game name";
+            int gameNumber = Integer.parseInt(params[0]);
+            if(!gameLookup.containsKey(gameNumber)){
+                return "Invalid game id";
             }
-            int gameID = gameLookup.get(gameName);
+            int gameID = gameLookup.get(gameNumber);
             return getGameString(gameID, ChessGame.TeamColor.WHITE);
         } catch (IOException | InterruptedException e){
             return "Something went wrong with the connection, please try again later";
