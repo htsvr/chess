@@ -6,18 +6,23 @@ import dataobjects.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 
+import io.javalin.websocket.WsMessageContext;
+import org.eclipse.jetty.websocket.api.Session;
 import service.*;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
-import java.util.Collection;
-import java.util.Map;
+import java.sql.Array;
+import java.util.*;
 
 public class Server {
 
     private final Javalin server;
+    private Map<Integer, ArrayList<WsMessageContext>> users;
 
     public Server() {
         server = Javalin.create(config -> config.staticFiles.add("web"));
+        users = new HashMap<>();
 
         // Register your endpoints and exception handlers here.
         server.delete("db", this::clear);
@@ -32,13 +37,75 @@ public class Server {
                 ctx.enableAutomaticPings();
                 System.out.println("Websocket connected");
             });
-            ws.onMessage(ctx -> {
-                UserGameCommand cmd = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-                System.out.println("received " + cmd.getCommandType() + ", " + cmd.getAuthToken() + ", " + cmd.getGameID());
-                ctx.send("{\"message\":\"" + ctx.message() + "\"}");
-            });
+            ws.onMessage(this::evalWsMessage);
             ws.onClose(ctx -> System.out.println("Websocket closed"));
         });
+    }
+
+    private void evalWsMessage(WsMessageContext ctx) {
+        UserGameCommand cmd = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+        System.out.println("received " + cmd.getCommandType() + ", " + cmd.getAuthToken() + ", " + cmd.getGameID());
+        ctx.send("{\"message\":\"" + ctx.message() + "\"}");
+        try {
+            AuthService.validateAuth(cmd.getAuthToken());
+            switch (cmd.getCommandType()) {
+                case UserGameCommand.CommandType.CONNECT -> {
+                    if (!users.containsKey(cmd.getGameID())) {
+                        users.put(cmd.getGameID(), new ArrayList<>());
+                    }
+                    users.get(cmd.getGameID()).add(ctx);
+                    String username = AuthService.getAuthToken(cmd.getAuthToken()).username();
+                    String message = null;
+                    for(GameData game : GameService.listGames(cmd.getAuthToken())) {
+                        if(game.gameID() == cmd.getGameID()){
+                            if(Objects.equals(game.whiteUsername(), username)) {
+                                message = username + " joined as white";
+                            } else if (Objects.equals(game.blackUsername(), username)) {
+                                message = username + " joined as black";
+                            } else {
+                                message = username + " started observing";
+                            }
+                        }
+                    }
+                    notifyOtherUsers(cmd.getGameID(), ctx,  message);
+                }
+                case UserGameCommand.CommandType.LEAVE -> {
+                    users.get(cmd.getGameID()).remove(ctx);
+                    String username = AuthService.getAuthToken(cmd.getAuthToken()).username();
+                    notifyOtherUsers(cmd.getGameID(), ctx, username + " left");
+                }
+                case UserGameCommand.CommandType.RESIGN -> {
+                    //TODO: make game end
+                    //TODO: notify all players
+                }
+                case UserGameCommand.CommandType.MAKE_MOVE -> {
+                    //TODO: get board
+                    //TODO: make move
+                    //TODO: send board to database
+                    //TODO: send move notification to other players
+                    //TODO: send board to all players
+                    ctx.session.notify();
+                }
+            }
+        } catch (UnrecognizedAuthTokenException e) {
+            //TODO: send error
+        } catch (Exception e) {
+            //TODO: send error
+        }
+    }
+
+    private void notifyAllUsers(int gameID, String message) {
+        for(WsMessageContext ctxToNotify : users.get(gameID)) {
+            ctxToNotify.send(new Gson().toJson(new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION)));
+        }
+    }
+
+    private void notifyOtherUsers(int gameID, WsMessageContext ctx, String message) {
+        for(WsMessageContext ctxToNotify : users.get(gameID)) {
+            if(ctxToNotify.session != ctx.session) {
+                ctxToNotify.send(new Gson().toJson(new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION)));
+            }
+        }
     }
 
     private void clear(Context ctx) {

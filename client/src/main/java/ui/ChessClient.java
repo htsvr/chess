@@ -89,6 +89,7 @@ public class ChessClient {
     public String leave() {
         try {
             serverFacade.leaveGame(auth.authToken(), currentGameID);
+            state = State.SIGNED_IN;
             return "";
         } catch (Exception e) {
             return handleErrors(e, null);
@@ -243,8 +244,10 @@ public class ChessClient {
             if(!gameLookup.containsKey(gameNumber)){
                 return "Invalid game id";
             }
-            int gameID = gameLookup.get(gameNumber);
-            return getGameString(gameID, ChessGame.TeamColor.WHITE);
+            currentGameID = gameLookup.get(gameNumber);
+            serverFacade.observeGame(new JoinRequest(ChessGame.TeamColor.WHITE, currentGameID, auth.authToken()));
+            state = State.GAMEPLAY;
+            return getGameString(currentGameID, ChessGame.TeamColor.WHITE);
         } catch (Exception e) {
             return handleErrors(e, Map.of(400, incorrectFormMessage));
         }

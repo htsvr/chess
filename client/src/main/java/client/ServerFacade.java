@@ -115,6 +115,10 @@ public class ServerFacade extends Endpoint {
         session.getBasicRemote().sendText(new Gson().toJson(new UserGameCommand(UserGameCommand.CommandType.CONNECT, req.authToken(), req.gameID())));
     }
 
+    public void observeGame(JoinRequest req) throws IOException {
+        session.getBasicRemote().sendText(new Gson().toJson(new UserGameCommand(UserGameCommand.CommandType.CONNECT, req.authToken(), req.gameID())));
+    }
+
     public void leaveGame(String authToken, int gameID) throws IOException {
         session.getBasicRemote().sendText(new Gson().toJson(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID)));
     }
