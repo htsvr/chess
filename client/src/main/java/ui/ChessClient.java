@@ -97,7 +97,7 @@ public class ChessClient {
     }
 
     public String move(String[] params) {
-        ChessMove move = new ChessMove(new ChessPosition(1, 2), new ChessPosition(3, 4), null);
+        ChessMove move = new ChessMove(new ChessPosition(2, 1), new ChessPosition(3, 1), null);
         try {
             serverFacade.move(auth.authToken(), currentGameID, move);
             return "";

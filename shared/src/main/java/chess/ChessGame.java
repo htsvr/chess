@@ -14,11 +14,13 @@ public class ChessGame {
     private ChessBoard board = new ChessBoard();
     private TeamColor turnColor;
     private ChessMove lastMove;
+    private boolean isOver;
 
     public ChessGame() {
         // set up new chess board at set it to white's turn
         board.resetBoard();
         turnColor = TeamColor.WHITE;
+        isOver = false;
     }
 
     /**
@@ -37,6 +39,14 @@ public class ChessGame {
         turnColor = team;
     }
 
+    public void setIsOver(boolean isOver) {
+        this.isOver = isOver;
+    }
+
+    public boolean getIsOver() {
+        return isOver;
+    }
+
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
@@ -53,7 +63,7 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        if(board.getPiece(startPosition) != null) { //Check if space is a piece
+        if(!isOver && board.getPiece(startPosition) != null) { //Check if space is a piece
             Collection<ChessMove> allMoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
             Collection<ChessMove> validMoves = new HashSet<>();
             for(ChessMove move:allMoves) {

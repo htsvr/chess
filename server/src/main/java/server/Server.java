@@ -21,11 +21,11 @@ import java.util.*;
 public class Server {
 
     private final Javalin server;
-    private Map<Integer, ArrayList<WsMessageContext>> users;
+    private final WebSocketService webSocketService;
 
     public Server() {
         server = Javalin.create(config -> config.staticFiles.add("web"));
-        users = new HashMap<>();
+        webSocketService = new WebSocketService();
 
         // Register your endpoints and exception handlers here.
         server.delete("db", this::clear);
@@ -40,83 +40,17 @@ public class Server {
                 ctx.enableAutomaticPings();
                 System.out.println("Websocket connected");
             });
-            ws.onMessage(this::evalWsMessage);
+            ws.onMessage(this::sendWsMessage);
             ws.onClose(ctx -> System.out.println("Websocket closed"));
         });
     }
 
-    private void evalWsMessage(WsMessageContext ctx) {
-        UserGameCommand cmd = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-        System.out.println("received " + cmd.getCommandType() + ", " + cmd.getAuthToken() + ", " + cmd.getGameID());
-        //ctx.send("{\"message\":\"" + ctx.message() + "\"}");
-        try {
-            AuthService.validateAuth(cmd.getAuthToken());
-            switch (cmd.getCommandType()) {
-                case UserGameCommand.CommandType.CONNECT -> {
-                    if (!users.containsKey(cmd.getGameID())) {
-                        users.put(cmd.getGameID(), new ArrayList<>());
-                    }
-                    users.get(cmd.getGameID()).add(ctx);
-                    String username = AuthService.getAuthToken(cmd.getAuthToken()).username();
-                    String message = null;
-                    GameData gameToConnect = null;
-                    for(GameData game : GameService.listGames(cmd.getAuthToken())) {
-                        if(game.gameID() == cmd.getGameID()){
-                            gameToConnect = game;
-                            if(Objects.equals(game.whiteUsername(), username)) {
-                                message = username + " joined as white";
-                            } else if (Objects.equals(game.blackUsername(), username)) {
-                                message = username + " joined as black";
-                            } else {
-                                message = username + " started observing";
-                            }
-                            break;
-                        }
-                    }
-                    if (gameToConnect == null) {
-                        ctx.send(new Gson().toJson(new ErrorServerMessage("Invalid game ID")));
-                    } else {
-                        ctx.send(new Gson().toJson(new LoadGameServerMessage(gameToConnect.game())));
-                        notifyOtherUsers(cmd.getGameID(), ctx, message);
-                    }
-                }
-                case UserGameCommand.CommandType.LEAVE -> {
-                    if (users.get(cmd.getGameID()).remove(ctx)) {
-                        String username = AuthService.getAuthToken(cmd.getAuthToken()).username();
-                        notifyOtherUsers(cmd.getGameID(), ctx, username + " left");
-                    } else {
-                        ctx.send(new Gson().toJson(new ErrorServerMessage("You aren't in the game with gameID " + cmd.getGameID())));
-                    }
-                }
-                case UserGameCommand.CommandType.RESIGN -> {
-                    //TODO: make game end
-                    //TODO: notify all players
-                }
-                case UserGameCommand.CommandType.MAKE_MOVE -> {
-                    //TODO: get board
-                    //TODO: make move
-                    //TODO: send board to database
-                    //TODO: send move notification to other players
-                    //TODO: send board to all players
-                }
-            }
-        } catch (UnrecognizedAuthTokenException e) {
-            ctx.send(new Gson().toJson(new ErrorServerMessage("You are unauthorized to perform this action")));
-        } catch (Exception e) {
-            ctx.send(new Gson().toJson(new ErrorServerMessage("Something went wrong")));
-        }
-    }
-
-    private void notifyAllUsers(int gameID, String message) {
-        for(WsMessageContext ctxToNotify : users.get(gameID)) {
-            ctxToNotify.send(new Gson().toJson(new NotificationServerMessage(message)));
-        }
-    }
-
-    private void notifyOtherUsers(int gameID, WsMessageContext ctx, String message) {
-        for(WsMessageContext ctxToNotify : users.get(gameID)) {
-            if(ctxToNotify.session != ctx.session) {
-                ctxToNotify.send(new Gson().toJson(new NotificationServerMessage(message)));
+    private void sendWsMessage(WsMessageContext ctx) {
+        Map<ServerMessage, Collection<WsMessageContext>> messages = webSocketService.evalWsMessage(ctx);
+        for(ServerMessage message:messages.keySet()) {
+            String messageJson = new Gson().toJson(message);
+            for(WsMessageContext ctxToNotify:messages.get(message)){
+                ctxToNotify.send(messageJson);
             }
         }
     }
