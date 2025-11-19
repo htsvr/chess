@@ -2,9 +2,12 @@ package client;
 
 import chess.ChessGame;
 import dataobjects.*;
+import jakarta.websocket.DeploymentException;
 import org.junit.jupiter.api.*;
 import server.Server;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -17,7 +20,7 @@ public class ServerFacadeTests {
     private static ServerFacade sf;
 
     @BeforeAll
-    public static void init() {
+    public static void init() throws URISyntaxException, DeploymentException, IOException {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);

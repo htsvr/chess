@@ -6,8 +6,10 @@ import chess.ChessPosition;
 import dataobjects.*;
 import client.ResponseException;
 import client.ServerFacade;
+import jakarta.websocket.DeploymentException;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
 
 import static ui.EscapeSequences.*;
@@ -17,15 +19,16 @@ public class ChessClient {
     private final ServerFacade serverFacade;
     private AuthData auth;
     private final Map<Integer, Integer> gameLookup;
+    private int currentGameID;
 
-    public ChessClient(String serverUrl) {
+    public ChessClient(String serverUrl) throws DeploymentException, URISyntaxException, IOException {
         state = State.SIGNED_OUT;
         serverFacade = new ServerFacade(serverUrl);
         auth = null;
         gameLookup = new HashMap<>();
     }
 
-    public void run() {
+    public void run() throws IOException {
         System.out.println("♕ 240 Chess Client: ");
         System.out.println(" Welcome to chess. Sign in to start.");
         System.out.println(help());
@@ -41,7 +44,7 @@ public class ChessClient {
         }
     }
 
-    public String eval(String line) {
+    public String eval(String line) throws IOException {
         String[] tokens = line.toLowerCase().split(" ");
         String cmd = "help";
         String[] params = null;
@@ -49,22 +52,80 @@ public class ChessClient {
             cmd = tokens[0];
             params = Arrays.copyOfRange(tokens, 1, tokens.length);
         }
-        return switch (cmd){
-            case "register" -> register(params);
-            case "login" -> login(params);
-            case "logout" -> logout();
-            case "quit" -> "quit";
-            case "create" -> createGame(params);
-            case "list" -> listGames();
-            case "observe" -> observeGame(params);
-            case "join" -> joinGame(params);
-            default -> help();
-        };
+        if (state == State.SIGNED_OUT) {
+            return switch (cmd) {
+                case "register" -> register(params);
+                case "login" -> login(params);
+                case "quit" -> "quit";
+                case "echo" -> echo(params);
+                default -> help();
+            };
+        } else if (state == State.SIGNED_IN) {
+            return switch (cmd) {
+                case "logout" -> logout();
+                case "quit" -> "quit";
+                case "create" -> createGame(params);
+                case "list" -> listGames();
+                case "observe" -> observeGame(params);
+                case "join" -> joinGame(params);
+                case "echo" -> echo(params);
+                default -> help();
+            };
+        } else {
+            return switch (cmd) {
+                case "redraw" -> redraw();
+                case "leave" -> leave();
+                case "move" -> move(params);
+                case "resign" -> resign();
+                case "highlight" -> highlight(params);
+                default -> help();
+            };
+        }
+    }
+
+    public String redraw() {
+        return null;
+    }
+
+    public String leave() {
+        try {
+            serverFacade.leaveGame(auth.authToken(), currentGameID);
+            return null;
+        } catch (Exception e) {
+            return handleErrors(e, null);
+        }
+    }
+
+    public String move(String[] params) {
+        return null;
+    }
+
+    public String resign() {
+        try {
+            serverFacade.leaveGame(auth.authToken(), currentGameID);
+            return null;
+        } catch (Exception e) {
+            return handleErrors(e, null);
+        }
+    }
+
+    public String highlight(String[] params) {
+        return null;
+    }
+
+    public String echo(String[] params) {
+        try {
+            serverFacade.echo(params[0]);
+            return "message sent";
+        } catch (Exception e) {
+            return "Something went wrong";
+        }
     }
 
     public String register(String[] params) {
+        String incorrectFormMessage = "Please register using the form 'register <USERNAME> <EMAIL> <PASSWORD>'";
         if (params.length != 3) {
-            return "Please register using the form 'register <USERNAME> <EMAIL> <PASSWORD>'";
+            return incorrectFormMessage;
         } else {
             UserData user = new UserData(params[0], params[2], params[1]);
             try{
@@ -75,27 +136,16 @@ public class ChessClient {
                 } else {
                     return "Something went wrong, please try again later";
                 }
-            } catch (IOException | InterruptedException e){
-                return "Something went wrong with the connection, please try again later";
-            } catch (ResponseException e) {
-                if(e.statusCode() / 100 == 5) {
-                    return "Something went wrong with the server, please try again later";
-                } else if (e.statusCode() == 400) {
-                    return "Please register using the form 'register <USERNAME> <EMAIL> <PASSWORD>'";
-                } else if (e.statusCode() == 403) {
-                    return "Username already in use, please pick a different username";
-                } else {
-                    return "Something went wrong";
-                }
             } catch (Exception e) {
-                return "Something went wrong";
+                return handleErrors(e, Map.of(400, incorrectFormMessage, 403, "Username already in use, please pick a different username"));
             }
         }
     }
 
     public String login(String[] params) {
+        String incorrectFormMessage = "Please login using the form 'login <USERNAME> <PASSWORD>'";
         if (params.length != 2) {
-            return "Please login using the form 'login <USERNAME> <PASSWORD>'";
+            return incorrectFormMessage;
         } else {
             LoginRequest user = new LoginRequest(params[0], params[1]);
             try{
@@ -106,20 +156,8 @@ public class ChessClient {
                 } else {
                     return "Something went wrong, please try again later";
                 }
-            } catch (IOException | InterruptedException e){
-                return "Something went wrong with the connection, please try again later";
-            } catch (ResponseException e) {
-                if(e.statusCode() / 100 == 5) {
-                    return "Something went wrong with the server, please try again later";
-                } else if (e.statusCode() == 400) {
-                    return "Please login using the form 'login <USERNAME> <PASSWORD>'";
-                } else if (e.statusCode() == 401) {
-                    return "Incorrect username or password";
-                } else {
-                    return "Something went wrong";
-                }
             } catch (Exception e) {
-                return "Something went wrong";
+                return handleErrors(e, Map.of(400, incorrectFormMessage, 401, "Incorrect username or password"));
             }
         }
     }
@@ -130,51 +168,20 @@ public class ChessClient {
             state = State.SIGNED_OUT;
             return "Successfully logged out";
         } catch (Exception e) {
-            return basicErrorHandling(e);
-        }
-    }
-
-    private String basicErrorHandling(Exception e) {
-        if (e.getClass() == IOException.class || e.getClass() == InterruptedException.class){
-            return "Something went wrong with the connection, please try again later";
-        } else if (e.getClass() == ResponseException.class){
-            if(((ResponseException) e).statusCode() / 100 == 5) {
-                return "Something went wrong with the server, please try again later";
-            } else if (((ResponseException) e).statusCode() == 401) {
-                return "You are not authorized to perform this action";
-            } else {
-                return "Something went wrong";
-            }
-        } else if (e.getClass() == NullPointerException.class){
-            return "You are not authorized to perform this action";
-        } else {
-            return "Something went wrong";
+            return handleErrors(e, null);
         }
     }
 
     public String createGame(String[] params) {
+        String incorrectFormMessage = "Please create a game using the form 'create <GAME NAME>'";
         if (params.length != 1) {
-            return "Please create a game using the form 'create <GAME NAME>'";
+            return incorrectFormMessage;
         }
         try {
             serverFacade.createGame(params[0], auth.authToken());
             return "Game created";
-        } catch (IOException | InterruptedException e){
-            return "Something went wrong with the connection, please try again later";
-        } catch (ResponseException e) {
-            if(e.statusCode() / 100 == 5) {
-                return "Something went wrong with the server, please try again later";
-            } else if (e.statusCode() == 401) {
-                return "You are not authorized to perform this action";
-            } else if (e.statusCode() == 400) {
-                return "Please create a game using the form 'create <GAME NAME>'";
-            } else {
-                return "Something went wrong";
-            }
-        } catch (NullPointerException e) {
-            return "You are not authorized to perform this action";
         } catch (Exception e) {
-            return "Something went wrong";
+            return handleErrors(e, Map.of(400, incorrectFormMessage));
         }
     }
 
@@ -197,13 +204,14 @@ public class ChessClient {
             }
             return result.toString();
         } catch (Exception e) {
-            return basicErrorHandling(e);
+            return handleErrors(e, null);
         }
     }
 
     public String joinGame(String[] params) {
+        String incorrectFormMessage = "Please join a game using the form 'join <GAME ID> [WHITE|BLACK]'";
         if (params.length != 2 || !params[0].matches("\\d+") || !(params[1].equals("white") || params[1].equals("black"))) {
-            return "Please join a game using the form 'join <GAME ID> [WHITE|BLACK]'";
+            return incorrectFormMessage;
         }
         try {
             ChessGame.TeamColor color = params[1].equals("white") ? ChessGame.TeamColor.WHITE: ChessGame.TeamColor.BLACK;
@@ -214,30 +222,15 @@ public class ChessClient {
             int gameID = gameLookup.get(gameNumber);
             serverFacade.joinGame(new JoinRequest(color, gameID, auth.authToken()));
             return getGameString(gameID, color);
-        } catch (IOException | InterruptedException e){
-            return "Something went wrong with the connection, please try again later";
-        } catch (ResponseException e) {
-            if(e.statusCode() / 100 == 5) {
-                return "Something went wrong with the server, please try again later";
-            } else if (e.statusCode() == 401) {
-                return "You are not authorized to perform this action";
-            } else if (e.statusCode() == 400) {
-                return "Please join a game using the form 'join <GAME ID> [WHITE|BLACK]'";
-            } else if (e.statusCode() == 403) {
-                return "Already taken, please pick a different game and/or color";
-            } else {
-                return "Something went wrong";
-            }
-        } catch (NullPointerException e) {
-            return "You are not authorized to perform this action";
-        } catch (Exception e) {
-            return "Something went wrong";
+        }  catch (Exception e) {
+            return handleErrors(e, Map.of(400, incorrectFormMessage, 403, "Already taken, please pick a different game and/or color"));
         }
     }
 
     public String observeGame(String[] params) {
+        String incorrectFormMessage = "Please observe a game using the form 'observe <ID>'";
         if (params.length != 1 || !params[0].matches("\\d+")) {
-            return "Please observe a game using the form 'observe <ID>'";
+            return incorrectFormMessage;
         }
         try {
             int gameNumber = Integer.parseInt(params[0]);
@@ -246,22 +239,8 @@ public class ChessClient {
             }
             int gameID = gameLookup.get(gameNumber);
             return getGameString(gameID, ChessGame.TeamColor.WHITE);
-        } catch (IOException | InterruptedException e){
-            return "Something went wrong with the connection, please try again later";
-        } catch (ResponseException e) {
-            if(e.statusCode() / 100 == 5) {
-                return "Something went wrong with the server, please try again later";
-            } else if (e.statusCode() == 401) {
-                return "You are not authorized to perform this action";
-            } else if (e.statusCode() == 400) {
-                return "Please observe a game using the form 'observe <ID>'";
-            } else {
-                return "Something went wrong";
-            }
-        } catch (NullPointerException e) {
-            return "You are not authorized to perform this action";
         } catch (Exception e) {
-            return "Something went wrong";
+            return handleErrors(e, Map.of(400, incorrectFormMessage));
         }
     }
 
@@ -273,7 +252,7 @@ public class ChessClient {
                     - login <USERNAME> <PASSWORD>
                     - register <USERNAME> <EMAIL> <PASSWORD>
                     """;
-        } else {
+        } else if (state == State.SIGNED_IN) {
             return """
                     - help
                     - logout
@@ -282,6 +261,39 @@ public class ChessClient {
                     - join <GAME ID> [WHITE|BLACK]
                     - observe <ID>
                     """;
+        } else {
+            return """
+                    - help
+                    - redraw
+                    - leave
+                    - move
+                    - resign
+                    - highlight
+                    """;
+        }
+    }
+
+    private String handleErrors(Exception e, Map<Integer, String> specialErrorMessages) {
+        if (e.getClass() == ResponseException.class) {
+            if (specialErrorMessages.containsKey(((ResponseException) e).statusCode())) {
+                return specialErrorMessages.get(((ResponseException) e).statusCode());
+            } else if(((ResponseException) e).statusCode() / 100 == 5) {
+                return "Something went wrong with the server, please try again later";
+            } else if (((ResponseException) e).statusCode() == 401) {
+                return "You are not authorized to perform this action";
+            } else if (((ResponseException) e).statusCode() == 400) {
+                return "Invalid command form";
+            } else if (((ResponseException) e).statusCode() == 403) {
+                return "Already taken";
+            } else {
+                return "Something went wrong";
+            }
+        } else if (e.getClass() == IOException.class || e.getClass() == InterruptedException.class) {
+            return "Something went wrong with the connection, please try again later";
+        } else if (e.getClass() == NullPointerException.class) {
+            return "You are not authorized to perform this action";
+        } else {
+            return "Something went wrong";
         }
     }
 

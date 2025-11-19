@@ -7,6 +7,7 @@ import io.javalin.*;
 import io.javalin.http.Context;
 
 import service.*;
+import websocket.commands.UserGameCommand;
 
 import java.util.Collection;
 import java.util.Map;
@@ -26,6 +27,18 @@ public class Server {
         server.get("game", this::listGames);
         server.post("game", this::createGame);
         server.put("game", this::joinGame);
+        server.ws("/ws", ws -> {
+            ws.onConnect(ctx -> {
+                ctx.enableAutomaticPings();
+                System.out.println("Websocket connected");
+            });
+            ws.onMessage(ctx -> {
+                UserGameCommand cmd = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+                System.out.println("received " + cmd.getCommandType() + ", " + cmd.getAuthToken() + ", " + cmd.getGameID());
+                ctx.send("{\"message\":\"" + ctx.message() + "\"}");
+            });
+            ws.onClose(ctx -> System.out.println("Websocket closed"));
+        });
     }
 
     private void clear(Context ctx) {

@@ -3,9 +3,12 @@ package client;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import dataobjects.*;
+import jakarta.websocket.*;
+import websocket.commands.UserGameCommand;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -13,12 +16,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ServerFacade {
+@ClientEndpoint
+public class ServerFacade extends Endpoint {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
+    private final Session session;
 
-    public ServerFacade(String url) {
+    public ServerFacade(String url) throws URISyntaxException, DeploymentException, IOException {
         serverUrl = url;
+        URI uri = new URI(url.replace("http", "ws") + "/ws");
+        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+        session = container.connectToServer(this, uri);
+        this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+            public void onMessage(String message) {
+                System.out.println(new Gson().fromJson(message, Map.class).get("message"));
+            }
+        });
+    }
+
+    public void echo(String message) throws IOException {
+        session.getBasicRemote().sendText(message);
     }
 
     public AuthData registerUser(UserData user) throws ResponseException, IOException, InterruptedException {
@@ -88,10 +105,24 @@ public class ServerFacade {
         return client.send(req.build(), HttpResponse.BodyHandlers.ofString());
     }
 
-    public void joinGame(JoinRequest req) throws IOException, InterruptedException, ResponseException {
+    public void joinGame(JoinRequest req) throws IOException, InterruptedException, ResponseException, EncodeException {
         HttpResponse<String> res = request("/game", "PUT", req, req.authToken());
         if (res.statusCode()/100 != 2){
             throw new ResponseException(res);
         }
+        session.getBasicRemote().sendText(new Gson().toJson(new UserGameCommand(UserGameCommand.CommandType.CONNECT, req.authToken(), req.gameID())));
+    }
+
+    public void leaveGame(String authToken, int gameID) throws IOException {
+        session.getBasicRemote().sendText(new Gson().toJson(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID)));
+    }
+
+    public void resign(String authToken, int gameID) throws IOException {
+        session.getBasicRemote().sendText(new Gson().toJson(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID)));
+    }
+
+    @Override
+    public void onOpen(Session session, EndpointConfig endpointConfig) {
+        System.out.println("WebSocket connected");
     }
 }
