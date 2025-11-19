@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SQLGameDAO implements GameDAO{
     public SQLGameDAO() throws DataAccessException{
@@ -34,12 +36,12 @@ public class SQLGameDAO implements GameDAO{
     }
 
     @Override
-    public Collection<GameData> getGames() throws DataAccessException{
+    public Map<Integer, GameData> getGames() throws DataAccessException{
         try(Connection conn = DatabaseManager.getConnection()) {
             String statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM gameTable";
             try(PreparedStatement preparedStatement = conn.prepareStatement(statement)) {
                 ResultSet rs = preparedStatement.executeQuery();
-                ArrayList<GameData> games = new ArrayList<>();
+                Map<Integer, GameData> games = new HashMap<>();
                 Gson serializer = new Gson();
                 int gameID;
                 String whiteUsername;
@@ -52,7 +54,7 @@ public class SQLGameDAO implements GameDAO{
                     blackUsername = rs.getString(3);
                     gameName = rs.getString(4);
                     gameObj = serializer.fromJson(rs.getString(5), ChessGame.class);
-                    games.add(new GameData(gameID, whiteUsername, blackUsername, gameName, gameObj));
+                    games.put(gameID, new GameData(gameID, whiteUsername, blackUsername, gameName, gameObj));
                 }
                 return games;
             }

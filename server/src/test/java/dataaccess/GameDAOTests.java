@@ -28,7 +28,7 @@ public class GameDAOTests {
         dataAccess.createGame(gameData2);
         games.add(gameData1);
         games.add(gameData2);
-        assertArrayEquals(games.toArray(), dataAccess.getGames().toArray());
+        assertArrayEquals(games.toArray(), dataAccess.getGames().values().toArray());
     }
 
     @ParameterizedTest
