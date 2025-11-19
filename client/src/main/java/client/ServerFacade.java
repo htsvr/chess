@@ -1,9 +1,11 @@
 package client;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import dataobjects.*;
 import jakarta.websocket.*;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 
 import java.io.IOException;
@@ -29,7 +31,7 @@ public class ServerFacade extends Endpoint {
         session = container.connectToServer(this, uri);
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
-                System.out.println(new Gson().fromJson(message, Map.class).get("message"));
+                System.out.println(message);
             }
         });
     }
@@ -119,6 +121,10 @@ public class ServerFacade extends Endpoint {
 
     public void resign(String authToken, int gameID) throws IOException {
         session.getBasicRemote().sendText(new Gson().toJson(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID)));
+    }
+
+    public void move(String authToken, int gameID, ChessMove move) throws IOException {
+        session.getBasicRemote().sendText(new Gson().toJson(new MakeMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, move)));
     }
 
     @Override

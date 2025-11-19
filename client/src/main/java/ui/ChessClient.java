@@ -1,8 +1,5 @@
 package ui;
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import dataobjects.*;
 import client.ResponseException;
 import client.ServerFacade;
@@ -20,6 +17,8 @@ public class ChessClient {
     private AuthData auth;
     private final Map<Integer, Integer> gameLookup;
     private int currentGameID;
+    private ChessBoard board;
+    private ChessGame.TeamColor color;
 
     public ChessClient(String serverUrl) throws DeploymentException, URISyntaxException, IOException {
         state = State.SIGNED_OUT;
@@ -84,33 +83,39 @@ public class ChessClient {
     }
 
     public String redraw() {
-        return null;
+        return getBoardString(board, color);
     }
 
     public String leave() {
         try {
             serverFacade.leaveGame(auth.authToken(), currentGameID);
-            return null;
+            return "";
         } catch (Exception e) {
             return handleErrors(e, null);
         }
     }
 
     public String move(String[] params) {
-        return null;
+        ChessMove move = new ChessMove(new ChessPosition(1, 2), new ChessPosition(3, 4), null);
+        try {
+            serverFacade.move(auth.authToken(), currentGameID, move);
+            return "";
+        } catch (Exception e) {
+            return handleErrors(e, null);
+        }
     }
 
     public String resign() {
         try {
             serverFacade.leaveGame(auth.authToken(), currentGameID);
-            return null;
+            return "";
         } catch (Exception e) {
             return handleErrors(e, null);
         }
     }
 
     public String highlight(String[] params) {
-        return null;
+        return "";
     }
 
     public String echo(String[] params) {
@@ -214,14 +219,15 @@ public class ChessClient {
             return incorrectFormMessage;
         }
         try {
-            ChessGame.TeamColor color = params[1].equals("white") ? ChessGame.TeamColor.WHITE: ChessGame.TeamColor.BLACK;
+            color = params[1].equals("white") ? ChessGame.TeamColor.WHITE: ChessGame.TeamColor.BLACK;
             int gameNumber = Integer.parseInt(params[0]);
             if(!gameLookup.containsKey(gameNumber)){
                 return "Invalid game id";
             }
-            int gameID = gameLookup.get(gameNumber);
-            serverFacade.joinGame(new JoinRequest(color, gameID, auth.authToken()));
-            return getGameString(gameID, color);
+            currentGameID = gameLookup.get(gameNumber);
+            serverFacade.joinGame(new JoinRequest(color, currentGameID, auth.authToken()));
+            state = State.GAMEPLAY;
+            return getGameString(currentGameID, color);
         }  catch (Exception e) {
             return handleErrors(e, Map.of(400, incorrectFormMessage, 403, "Already taken, please pick a different game and/or color"));
         }
