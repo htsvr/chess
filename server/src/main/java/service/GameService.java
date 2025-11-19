@@ -6,7 +6,6 @@ import dataobjects.GameData;
 import dataobjects.JoinRequest;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Random;
 
 public class GameService {
@@ -35,7 +34,7 @@ public class GameService {
      * @return a collection all the GameData abjects in the database
      * @throws UnrecognizedAuthTokenException if the auth token is invalid
      */
-    public static Map<Integer, GameData> listGames(String authToken) throws UnrecognizedAuthTokenException, DataAccessException{
+    public static Collection<GameData> listGames(String authToken) throws UnrecognizedAuthTokenException, DataAccessException{
         AuthService.validateAuth(authToken);
         return GAME_DATA_ACCESS.getGames();
     }

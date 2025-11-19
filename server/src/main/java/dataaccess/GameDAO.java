@@ -4,10 +4,9 @@ import dataobjects.GameData;
 
 import javax.xml.crypto.Data;
 import java.util.Collection;
-import java.util.Map;
 
 public interface GameDAO {
-    Map<Integer, GameData> getGames() throws DataAccessException;
+    Collection<GameData> getGames() throws DataAccessException;
     GameData getGame(int gameID) throws DataAccessException;
     void createGame(GameData game) throws DataAccessException;
     void clear() throws DataAccessException;

@@ -58,19 +58,25 @@ public class Server {
                     }
                     users.get(cmd.getGameID()).add(ctx);
                     String username = AuthService.getAuthToken(cmd.getAuthToken()).username();
-                    String message;
-                    GameData game = GameService.listGames(cmd.getAuthToken()).get(cmd.getGameID());
-                    if (game == null) {
+                    String message = null;
+                    GameData gameToConnect = null;
+                    for(GameData game : GameService.listGames(cmd.getAuthToken())) {
+                        if(game.gameID() == cmd.getGameID()){
+                            gameToConnect = game;
+                            if(Objects.equals(game.whiteUsername(), username)) {
+                                message = username + " joined as white";
+                            } else if (Objects.equals(game.blackUsername(), username)) {
+                                message = username + " joined as black";
+                            } else {
+                                message = username + " started observing";
+                            }
+                            break;
+                        }
+                    }
+                    if (gameToConnect == null) {
                         ctx.send(new Gson().toJson(new ErrorServerMessage("Invalid game ID")));
                     } else {
-                        if(Objects.equals(game.whiteUsername(), username)) {
-                            message = username + " joined as white";
-                        } else if (Objects.equals(game.blackUsername(), username)) {
-                            message = username + " joined as black";
-                        } else {
-                            message = username + " started observing";
-                        }
-                        ctx.send(new Gson().toJson(new LoadGameServerMessage(game.game())));
+                        ctx.send(new Gson().toJson(new LoadGameServerMessage(gameToConnect.game())));
                         notifyOtherUsers(cmd.getGameID(), ctx, message);
                     }
                 }
@@ -156,7 +162,7 @@ public class Server {
         String authToken = ctx.header("Authorization");
         Gson serializer = new Gson();
         try {
-            Collection<GameData> gameList = GameService.listGames(authToken).values();
+            Collection<GameData> gameList = GameService.listGames(authToken);
             ctx.status(200);
             ctx.result("{\"games\": " + serializer.toJson(gameList) + "}");
         } catch (UnrecognizedAuthTokenException e) {

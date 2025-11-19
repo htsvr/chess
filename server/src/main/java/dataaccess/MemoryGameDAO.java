@@ -4,7 +4,6 @@ import dataobjects.GameData;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 
 public class MemoryGameDAO implements GameDAO{
     public final HashMap<Integer, GameData> gameList;
@@ -14,8 +13,8 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public Map<Integer, GameData> getGames() {
-        return gameList;
+    public Collection<GameData> getGames() {
+        return gameList.values();
     }
 
     @Override
