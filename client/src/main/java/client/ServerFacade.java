@@ -5,8 +5,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import dataobjects.*;
 import jakarta.websocket.*;
+import ui.BoardHandler;
+import ui.EscapeSequences;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorServerMessage;
+import websocket.messages.LoadGameServerMessage;
+import websocket.messages.NotificationServerMessage;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,21 +29,38 @@ public class ServerFacade extends Endpoint {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
     private final Session session;
+    private final BoardHandler boardHandler;
 
-    public ServerFacade(String url) throws URISyntaxException, DeploymentException, IOException {
+    public ServerFacade(String url, BoardHandler boardHandler) throws URISyntaxException, DeploymentException, IOException {
         serverUrl = url;
+        this.boardHandler = boardHandler;
         URI uri = new URI(url.replace("http", "ws") + "/ws");
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         session = container.connectToServer(this, uri);
-        this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-            public void onMessage(String message) {
-                System.out.println(message);
-            }
-        });
+        this.session.addMessageHandler((MessageHandler.Whole<String>) this::evalMessage);
     }
 
-    public void echo(String message) throws IOException {
-        session.getBasicRemote().sendText(message);
+    public void evalMessage(String messageJson) {
+        ServerMessage message = new Gson().fromJson(messageJson, ServerMessage.class);
+        switch(message.getServerMessageType()) {
+            case NOTIFICATION -> {
+                message = new Gson().fromJson(messageJson, NotificationServerMessage.class);
+                System.out.println(EscapeSequences.SET_TEXT_COLOR_YELLOW +
+                        ((NotificationServerMessage) message).getMessage()
+                        + EscapeSequences.RESET_TEXT_COLOR);
+            }
+            case ERROR -> {
+                message = new Gson().fromJson(messageJson, ErrorServerMessage.class);
+                System.out.println(EscapeSequences.SET_TEXT_COLOR_RED +
+                        "Error: " +
+                        ((ErrorServerMessage) message).getErrorMessage()
+                        + EscapeSequences.RESET_TEXT_COLOR);
+            }
+            case LOAD_GAME -> {
+                message = new Gson().fromJson(messageJson, LoadGameServerMessage.class);
+                boardHandler.updateBoard(((LoadGameServerMessage) message).getGame().getBoard());
+            }
+        }
     }
 
     public AuthData registerUser(UserData user) throws ResponseException, IOException, InterruptedException {
@@ -107,7 +130,7 @@ public class ServerFacade extends Endpoint {
         return client.send(req.build(), HttpResponse.BodyHandlers.ofString());
     }
 
-    public void joinGame(JoinRequest req) throws IOException, InterruptedException, ResponseException, EncodeException {
+    public void joinGame(JoinRequest req) throws IOException, InterruptedException, ResponseException {
         HttpResponse<String> res = request("/game", "PUT", req, req.authToken());
         if (res.statusCode()/100 != 2){
             throw new ResponseException(res);

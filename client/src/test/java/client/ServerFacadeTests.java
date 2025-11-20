@@ -5,6 +5,7 @@ import dataobjects.*;
 import jakarta.websocket.DeploymentException;
 import org.junit.jupiter.api.*;
 import server.Server;
+import ui.BoardHandler;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -24,7 +25,7 @@ public class ServerFacadeTests {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
-        sf = new ServerFacade("http://localhost:" + port);
+        sf = new ServerFacade("http://localhost:" + port, new BoardHandler());
     }
 
     @AfterAll

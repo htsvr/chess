@@ -20,12 +20,12 @@ import java.util.*;
 public class WebSocketService {
 
     private final Map<Integer, ArrayList<WsMessageContext>> users;
-    private final GameDAO GAME_DATA_ACCESS;
+    private final GameDAO gameDataAccess;
 
     public WebSocketService() {
         users = new HashMap<>();
         try {
-            GAME_DATA_ACCESS = new SQLGameDAO();
+            gameDataAccess = new SQLGameDAO();
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -49,28 +49,30 @@ public class WebSocketService {
         }
     }
 
-    private Map<ServerMessage, Collection<WsMessageContext>> resign (WsMessageContext ctx, UserGameCommand cmd) throws DataAccessException, UnrecognizedAuthTokenException {
-        GameData game = GAME_DATA_ACCESS.getGame(cmd.getGameID());
+    private Map<ServerMessage, Collection<WsMessageContext>> resign (WsMessageContext ctx, UserGameCommand cmd)
+            throws DataAccessException, UnrecognizedAuthTokenException {
+        GameData game = gameDataAccess.getGame(cmd.getGameID());
         String username = AuthService.getAuthToken(cmd.getAuthToken()).username();
         if (game.game().getIsOver()) {
             return Map.of(new ErrorServerMessage("Can't resign, game is already over"), List.of(ctx));
         } else if (Objects.equals(game.whiteUsername(), username) || Objects.equals(game.blackUsername(), username)) {
             game.game().setIsOver(true);
-            GAME_DATA_ACCESS.updateGame(cmd.getGameID(), game);
+            gameDataAccess.updateGame(cmd.getGameID(), game);
             return Map.of(new NotificationServerMessage(username + " resigned"), users.get(cmd.getGameID()));
         } else {
             return Map.of(new ErrorServerMessage("Can't resign, game is already over"), List.of(ctx));
         }
     }
 
-    private Map<ServerMessage, Collection<WsMessageContext>> move (WsMessageContext ctx, MakeMoveCommand cmd) throws DataAccessException, UnrecognizedAuthTokenException {
-        GameData game = GAME_DATA_ACCESS.getGame(cmd.getGameID());
+    private Map<ServerMessage, Collection<WsMessageContext>> move (WsMessageContext ctx, MakeMoveCommand cmd)
+            throws DataAccessException, UnrecognizedAuthTokenException {
+        GameData game = gameDataAccess.getGame(cmd.getGameID());
         String username = AuthService.getAuthToken(cmd.getAuthToken()).username();
         try {
             if (game.game().getTeamTurn() == ChessGame.TeamColor.WHITE && Objects.equals(game.whiteUsername(), username) ||
                     game.game().getTeamTurn() == ChessGame.TeamColor.BLACK && Objects.equals(game.blackUsername(), username)) {
                 game.game().makeMove(cmd.getMove());
-                GAME_DATA_ACCESS.updateGame(cmd.getGameID(), game);
+                gameDataAccess.updateGame(cmd.getGameID(), game);
                 return Map.of(
                         new NotificationServerMessage(username + " moved " + cmd.getMove().toString()),
                         getOtherUsers(cmd.getGameID(), ctx),
@@ -85,17 +87,17 @@ public class WebSocketService {
         }
     }
 
-    private Map<ServerMessage, Collection<WsMessageContext>> leave (WsMessageContext ctx, UserGameCommand cmd) throws UnrecognizedAuthTokenException, DataAccessException {
+    private Map<ServerMessage, Collection<WsMessageContext>> leave (WsMessageContext ctx, UserGameCommand cmd)
+            throws UnrecognizedAuthTokenException, DataAccessException {
         if (users.get(cmd.getGameID()).remove(ctx)) {
             String username = AuthService.getAuthToken(cmd.getAuthToken()).username();
-            //TODO: remove username from gamedata
-            GameData game = GAME_DATA_ACCESS.getGame(cmd.getGameID());
+            GameData game = gameDataAccess.getGame(cmd.getGameID());
             if (Objects.equals(game.whiteUsername(), username)) {
                 game = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game());
             } else if (Objects.equals(game.blackUsername(), username)) {
                 game = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game());
             }
-            GAME_DATA_ACCESS.updateGame(cmd.getGameID(), game);
+            gameDataAccess.updateGame(cmd.getGameID(), game);
             return Map.of(new NotificationServerMessage(username + " left"), users.get(cmd.getGameID()));
         } else {
             return Map.of(new ErrorServerMessage("You aren't in the game with gameID " + cmd.getGameID()), List.of(ctx));
@@ -119,7 +121,7 @@ public class WebSocketService {
         users.get(cmd.getGameID()).add(ctx);
         String username = AuthService.getAuthToken(cmd.getAuthToken()).username();
         String message;
-        GameData game = GAME_DATA_ACCESS.getGame(cmd.getGameID());
+        GameData game = gameDataAccess.getGame(cmd.getGameID());
         if (game == null) {
             return Map.of(new ErrorServerMessage("Invalid game ID"), List.of(ctx));
         } else {
@@ -130,7 +132,8 @@ public class WebSocketService {
             } else {
                 message = username + " started observing";
             }
-            return Map.of(new LoadGameServerMessage(game.game()), List.of(ctx), new NotificationServerMessage(message), getOtherUsers(cmd.getGameID(), ctx));
+            return Map.of(new LoadGameServerMessage(game.game()), List.of(ctx),
+                    new NotificationServerMessage(message), getOtherUsers(cmd.getGameID(), ctx));
         }
     }
 }

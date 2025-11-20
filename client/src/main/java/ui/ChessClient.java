@@ -9,25 +9,23 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import static ui.EscapeSequences.*;
-
 public class ChessClient {
     private State state;
     private final ServerFacade serverFacade;
     private AuthData auth;
     private final Map<Integer, Integer> gameLookup;
     private int currentGameID;
-    private ChessBoard board;
-    private ChessGame.TeamColor color;
+    private final BoardHandler boardHandler;
 
     public ChessClient(String serverUrl) throws DeploymentException, URISyntaxException, IOException {
         state = State.SIGNED_OUT;
-        serverFacade = new ServerFacade(serverUrl);
+        boardHandler = new BoardHandler();
+        serverFacade = new ServerFacade(serverUrl, boardHandler);
         auth = null;
         gameLookup = new HashMap<>();
     }
 
-    public void run() throws IOException {
+    public void run() {
         System.out.println("♕ 240 Chess Client: ");
         System.out.println(" Welcome to chess. Sign in to start.");
         System.out.println(help());
@@ -35,7 +33,9 @@ public class ChessClient {
         Scanner scanner = new Scanner(System.in);
         String result = "";
         while (!result.equals("quit")) {
-            System.out.print("[" + state + "] >>>");
+            if(state != State.GAMEPLAY) {
+                System.out.print("[" + state + "] >>>");
+            }
             String line = scanner.nextLine();
 
             result = eval(line);
@@ -43,7 +43,7 @@ public class ChessClient {
         }
     }
 
-    public String eval(String line) throws IOException {
+    public String eval(String line) {
         String[] tokens = line.toLowerCase().split(" ");
         String cmd = "help";
         String[] params = null;
@@ -56,7 +56,6 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "quit" -> "quit";
-                case "echo" -> echo(params);
                 default -> help();
             };
         } else if (state == State.SIGNED_IN) {
@@ -67,7 +66,6 @@ public class ChessClient {
                 case "list" -> listGames();
                 case "observe" -> observeGame(params);
                 case "join" -> joinGame(params);
-                case "echo" -> echo(params);
                 default -> help();
             };
         } else {
@@ -83,7 +81,8 @@ public class ChessClient {
     }
 
     public String redraw() {
-        return getBoardString(board, color);
+        boardHandler.drawBoard();
+        return "";
     }
 
     public String leave() {
@@ -97,7 +96,17 @@ public class ChessClient {
     }
 
     public String move(String[] params) {
-        ChessMove move = new ChessMove(new ChessPosition(2, 1), new ChessPosition(3, 1), null);
+        String incorrectFormMessage = "Please move using the form 'move <start><end>' i.e. 'move e2e3'";
+        if (params.length != 1 ||
+                !('a' <= params[0].charAt(0) && params[0].charAt(0) <= 'h') ||
+                !('1' <= params[0].charAt(1) && params[0].charAt(1) <= '8') ||
+                !('a' <= params[0].charAt(2) && params[0].charAt(2) <= 'h') ||
+                !('1' <= params[0].charAt(3) && params[0].charAt(3) <= '8')) {
+            return incorrectFormMessage;
+        }
+        ChessPosition start = new ChessPosition(((int) params[0].charAt(1))-48, ((int) params[0].charAt(0))-96);
+        ChessPosition end = new ChessPosition(((int) params[0].charAt(3))-48, ((int) params[0].charAt(2))-96);
+        ChessMove move = new ChessMove(start, end, null);
         try {
             serverFacade.move(auth.authToken(), currentGameID, move);
             return "";
@@ -108,7 +117,7 @@ public class ChessClient {
 
     public String resign() {
         try {
-            serverFacade.leaveGame(auth.authToken(), currentGameID);
+            serverFacade.resign(auth.authToken(), currentGameID);
             return "";
         } catch (Exception e) {
             return handleErrors(e, null);
@@ -117,15 +126,6 @@ public class ChessClient {
 
     public String highlight(String[] params) {
         return "";
-    }
-
-    public String echo(String[] params) {
-        try {
-            serverFacade.echo(params[0]);
-            return "message sent";
-        } catch (Exception e) {
-            return "Something went wrong";
-        }
     }
 
     public String register(String[] params) {
@@ -220,15 +220,15 @@ public class ChessClient {
             return incorrectFormMessage;
         }
         try {
-            color = params[1].equals("white") ? ChessGame.TeamColor.WHITE: ChessGame.TeamColor.BLACK;
+            boardHandler.setColor(params[1].equals("white") ? ChessGame.TeamColor.WHITE: ChessGame.TeamColor.BLACK);
             int gameNumber = Integer.parseInt(params[0]);
             if(!gameLookup.containsKey(gameNumber)){
                 return "Invalid game id";
             }
             currentGameID = gameLookup.get(gameNumber);
-            serverFacade.joinGame(new JoinRequest(color, currentGameID, auth.authToken()));
+            serverFacade.joinGame(new JoinRequest(boardHandler.getColor(), currentGameID, auth.authToken()));
             state = State.GAMEPLAY;
-            return getGameString(currentGameID, color);
+            return "";
         }  catch (Exception e) {
             return handleErrors(e, Map.of(400, incorrectFormMessage, 403, "Already taken, please pick a different game and/or color"));
         }
@@ -247,7 +247,7 @@ public class ChessClient {
             currentGameID = gameLookup.get(gameNumber);
             serverFacade.observeGame(new JoinRequest(ChessGame.TeamColor.WHITE, currentGameID, auth.authToken()));
             state = State.GAMEPLAY;
-            return getGameString(currentGameID, ChessGame.TeamColor.WHITE);
+            return "";
         } catch (Exception e) {
             return handleErrors(e, Map.of(400, incorrectFormMessage));
         }
@@ -304,94 +304,5 @@ public class ChessClient {
         } else {
             return "Something went wrong";
         }
-    }
-
-    private String getGameString(int gameID, ChessGame.TeamColor color) throws IOException, InterruptedException, ResponseException{
-        ArrayList<GameData> gameList = serverFacade.listGames(auth.authToken());
-        ChessGame resultGame = null;
-        for (GameData game: gameList) {
-            if(game.gameID() == gameID) {
-                resultGame = game.game();
-            }
-        }
-        if(resultGame != null) {
-            return getBoardString(resultGame.getBoard(), color);
-        }
-        return "Could not retrieve game";
-    }
-
-    public String getBoardString(ChessBoard board, ChessGame.TeamColor teamColor) {
-        StringBuilder result = new StringBuilder();
-        boolean whiteTile;
-        int[] rows, cols;
-        if (teamColor == ChessGame.TeamColor.WHITE){
-            rows = new int[]{7, 6, 5, 4, 3, 2, 1, 0};
-            cols = new int[]{0, 1, 2, 3, 4, 5, 6, 7};
-        } else {
-            cols = new int[]{7, 6, 5, 4, 3, 2, 1, 0};
-            rows = new int[]{0, 1, 2, 3, 4, 5, 6, 7};
-        }
-
-        String labelRow = "   \u2003a \u2003b \u2003c \u2003d \u2003e \u2003f \u2003g \u2003h    ";
-        if(teamColor == ChessGame.TeamColor.BLACK){
-            labelRow = new StringBuilder(labelRow).reverse().toString();
-        }
-        result.append(RESET_TEXT_BOLD_FAINT)
-                .append(SET_TEXT_COLOR_LIGHT_GREY)
-                .append(SET_BG_COLOR_DARK_GREY)
-                .append(labelRow)
-                .append(RESET_BG_COLOR)
-                .append(RESET_TEXT_COLOR)
-                .append("\n");
-        for (int r: rows){
-            result.append(SET_TEXT_COLOR_LIGHT_GREY)
-                    .append(SET_BG_COLOR_DARK_GREY)
-                    .append(" ")
-                    .append(r+1)
-                    .append(" ");
-            for (int c: cols) {
-                whiteTile = (r%2 + c%2)%2 == 1;
-                result.append(whiteTile ? SET_BG_COLOR_WHITE : SET_BG_COLOR_LIGHT_GREY);
-                ChessPiece piece = board.getPiece(new ChessPosition(r + 1, c + 1));
-                if (piece == null){
-                    result.append(EMPTY);
-                } else {
-                    if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
-                        result.append(SET_TEXT_COLOR_BLACK);
-                    } else {
-                        result.append(SET_TEXT_COLOR_DARK_GREY);
-                    }
-                    switch(piece.getPieceType()){
-                        case ChessPiece.PieceType.PAWN ->
-                            result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_PAWN: BLACK_PAWN);
-                        case ChessPiece.PieceType.KING ->
-                            result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_KING: BLACK_KING);
-                        case ChessPiece.PieceType.QUEEN ->
-                            result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_QUEEN: BLACK_QUEEN);
-                        case ChessPiece.PieceType.BISHOP ->
-                            result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_BISHOP: BLACK_BISHOP);
-                        case ChessPiece.PieceType.KNIGHT ->
-                            result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_KNIGHT: BLACK_KNIGHT);
-                        case ChessPiece.PieceType.ROOK ->
-                            result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_ROOK: BLACK_ROOK);
-                    }
-                }
-            }
-            result.append(SET_TEXT_COLOR_LIGHT_GREY).
-                    append(SET_BG_COLOR_DARK_GREY)
-                    .append(" ")
-                    .append(r+1)
-                    .append(" ")
-                    .append(RESET_BG_COLOR)
-                    .append(RESET_TEXT_COLOR)
-                    .append("\n");
-        }
-        result.append(SET_TEXT_COLOR_LIGHT_GREY)
-                .append(SET_BG_COLOR_DARK_GREY)
-                .append(labelRow)
-                .append(RESET_BG_COLOR)
-                .append(RESET_TEXT_COLOR)
-                .append("\n");
-        return result.toString();
     }
 }

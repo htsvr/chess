@@ -69,10 +69,10 @@ public class ChessMove {
     @Override
     public String toString() {
         if(promotionPiece == null) {
-            return startPosition + " -> " + endPosition;
+            return startPosition.toString() + endPosition;
         }
         else{
-            return startPosition + " -> " + endPosition + " **" + promotionPiece + "**";
+            return startPosition.toString() + endPosition + " **" + promotionPiece + "**";
         }
     }
 }
