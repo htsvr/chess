@@ -75,7 +75,8 @@ public class BoardHandler {
                     .append(SET_BG_COLOR_DARK_GREY)
                     .append(" ")
                     .append(r+1)
-                    .append(" ");
+                    .append(" ")
+                    .append(SET_TEXT_COLOR_BLACK);
             for (int c: cols) {
                 whiteTile = (r%2 + c%2)%2 == 1;
                 if(isPos(r, c, pieceToHighlight)){
@@ -89,12 +90,6 @@ public class BoardHandler {
                 if (piece == null){
                     result.append(EMPTY);
                 } else {
-                    result.append(SET_TEXT_COLOR_BLACK);
-//                    if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
-//                        result.append(SET_TEXT_COLOR_BLACK);
-//                    } else {
-//                        result.append(SET_TEXT_COLOR_DARK_GREY);
-//                    }
                     switch(piece.getPieceType()){
                         case ChessPiece.PieceType.PAWN ->
                                 result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_PAWN: BLACK_PAWN);
