@@ -96,17 +96,35 @@ public class ChessClient {
     }
 
     public String move(String[] params) {
-        String incorrectFormMessage = "Please move using the form 'move <start><end>' i.e. 'move e2e3'";
-        if (params.length != 1 ||
-                !('a' <= params[0].charAt(0) && params[0].charAt(0) <= 'h') ||
-                !('1' <= params[0].charAt(1) && params[0].charAt(1) <= '8') ||
-                !('a' <= params[0].charAt(2) && params[0].charAt(2) <= 'h') ||
-                !('1' <= params[0].charAt(3) && params[0].charAt(3) <= '8')) {
+        String incorrectFormMessage = "Please move using the form 'move <START><END>=<PROMOTION PIECE>' i.e. 'move e2e3' or 'move b7b8=Q";
+        if (!(params.length == 1 &&
+                ('a' <= params[0].charAt(0) && params[0].charAt(0) <= 'h') &&
+                ('1' <= params[0].charAt(1) && params[0].charAt(1) <= '8') &&
+                ('a' <= params[0].charAt(2) && params[0].charAt(2) <= 'h') &&
+                ('1' <= params[0].charAt(3) && params[0].charAt(3) <= '8') &&
+                (params[0].length() == 4 || (params[0].length() == 6 &&
+                        params[0].charAt(4) == '=')))) {
             return incorrectFormMessage;
         }
         ChessPosition start = new ChessPosition(((int) params[0].charAt(1))-48, ((int) params[0].charAt(0))-96);
         ChessPosition end = new ChessPosition(((int) params[0].charAt(3))-48, ((int) params[0].charAt(2))-96);
-        ChessMove move = new ChessMove(start, end, null);
+        ChessMove move;
+        if(params[0].length() == 4) {
+            move = new ChessMove(start, end, null);
+        } else {
+            ChessPiece.PieceType piece = null;
+            switch(params[0].charAt(5)){
+                case 'q' -> piece = ChessPiece.PieceType.QUEEN;
+                case 'n' -> piece = ChessPiece.PieceType.KNIGHT;
+                case 'b' -> piece = ChessPiece.PieceType.BISHOP;
+                case 'r' -> piece = ChessPiece.PieceType.ROOK;
+                case 'p' -> piece = ChessPiece.PieceType.PAWN;
+            }
+            if (piece == null) {
+                return incorrectFormMessage;
+            }
+            move = new ChessMove(start, end, piece);
+        }
         try {
             serverFacade.move(auth.authToken(), currentGameID, move);
             return "";
@@ -125,6 +143,14 @@ public class ChessClient {
     }
 
     public String highlight(String[] params) {
+        String incorrectFormMessage = "Please highlight using the form 'highlight <PIECE POSITION>' i.e. 'highlight e2'";
+        if (params.length != 1 ||
+                !('a' <= params[0].charAt(0) && params[0].charAt(0) <= 'h') ||
+                !('1' <= params[0].charAt(1) && params[0].charAt(1) <= '8')) {
+            return incorrectFormMessage;
+        }
+        ChessPosition pos = new ChessPosition(((int) params[0].charAt(1))-48, ((int) params[0].charAt(0))-96);
+        boardHandler.highlightBoard(pos);
         return "";
     }
 

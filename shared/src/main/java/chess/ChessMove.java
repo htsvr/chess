@@ -72,7 +72,7 @@ public class ChessMove {
             return startPosition.toString() + endPosition;
         }
         else{
-            return startPosition.toString() + endPosition + " **" + promotionPiece + "**";
+            return startPosition.toString() + endPosition + "=" + new ChessPiece(ChessGame.TeamColor.WHITE, promotionPiece);
         }
     }
 }

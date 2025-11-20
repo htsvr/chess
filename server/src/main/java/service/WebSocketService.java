@@ -73,6 +73,16 @@ public class WebSocketService {
                     game.game().getTeamTurn() == ChessGame.TeamColor.BLACK && Objects.equals(game.blackUsername(), username)) {
                 game.game().makeMove(cmd.getMove());
                 gameDataAccess.updateGame(cmd.getGameID(), game);
+                if(game.game().isInCheckmate(game.game().getTeamTurn()) || game.game().isInStalemate(game.game().getTeamTurn())) {
+                    return Map.of(
+                            new NotificationServerMessage(username + " moved " + cmd.getMove().toString()),
+                            getOtherUsers(cmd.getGameID(), ctx),
+                            new LoadGameServerMessage(game.game()),
+                            users.get(cmd.getGameID()),
+                            new NotificationServerMessage(username + " won the game"),
+                            users.get(cmd.getGameID())
+                    );
+                }
                 return Map.of(
                         new NotificationServerMessage(username + " moved " + cmd.getMove().toString()),
                         getOtherUsers(cmd.getGameID(), ctx),

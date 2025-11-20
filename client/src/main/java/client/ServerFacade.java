@@ -37,7 +37,11 @@ public class ServerFacade extends Endpoint {
         URI uri = new URI(url.replace("http", "ws") + "/ws");
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         session = container.connectToServer(this, uri);
-        this.session.addMessageHandler((MessageHandler.Whole<String>) this::evalMessage);
+        this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+            public void onMessage(String message) {
+                evalMessage(message);
+            }
+        });
     }
 
     public void evalMessage(String messageJson) {
@@ -58,7 +62,7 @@ public class ServerFacade extends Endpoint {
             }
             case LOAD_GAME -> {
                 message = new Gson().fromJson(messageJson, LoadGameServerMessage.class);
-                boardHandler.updateBoard(((LoadGameServerMessage) message).getGame().getBoard());
+                boardHandler.updateGame(((LoadGameServerMessage) message).getGame());
             }
         }
     }

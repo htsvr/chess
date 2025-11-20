@@ -1,28 +1,37 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static ui.EscapeSequences.*;
 
 public class BoardHandler {
-    private ChessBoard board;
+    private ChessGame game;
     private ChessGame.TeamColor color;
 
     public BoardHandler () {
-        board = new ChessBoard();
+        game = new ChessGame();
         color = null;
     }
 
-    public void updateBoard(ChessBoard board) {
-        this.board = board;
+    public void updateGame(ChessGame game) {
+        this.game = game;
         drawBoard();
     }
 
     public void drawBoard() {
         System.out.println(getBoardString());
+    }
+
+    public void highlightBoard(ChessPosition piecePos) {
+        Collection<ChessMove> validMoves = game.validMoves(piecePos);
+        ArrayList<ChessPosition> highlightPositions = new ArrayList<>();
+        for (ChessMove move : validMoves) {
+            highlightPositions.add(move.getEndPosition());
+        }
+        System.out.println(getBoardString(piecePos, highlightPositions));
     }
 
     public void setColor(ChessGame.TeamColor color) {
@@ -34,6 +43,11 @@ public class BoardHandler {
     }
 
     public String getBoardString() {
+        return getBoardString(new ChessPosition(0, 0), new ArrayList<>());
+    }
+
+    public String getBoardString(ChessPosition pieceToHighlight, Collection<ChessPosition> spacesToHighlight) {
+        ChessBoard board = game.getBoard();
         StringBuilder result = new StringBuilder();
         boolean whiteTile;
         int[] rows, cols;
@@ -64,16 +78,23 @@ public class BoardHandler {
                     .append(" ");
             for (int c: cols) {
                 whiteTile = (r%2 + c%2)%2 == 1;
-                result.append(whiteTile ? SET_BG_COLOR_WHITE : SET_BG_COLOR_LIGHT_GREY);
+                if(isPos(r, c, pieceToHighlight)){
+                    result.append(SET_BG_COLOR_YELLOW);
+                } else if (isPos(r, c, spacesToHighlight)){
+                    result.append(whiteTile ? SET_BG_COLOR_GREEN : SET_BG_COLOR_DARK_GREEN);
+                } else {
+                    result.append(whiteTile ? SET_BG_COLOR_WHITE : SET_BG_COLOR_LIGHT_GREY);
+                }
                 ChessPiece piece = board.getPiece(new ChessPosition(r + 1, c + 1));
                 if (piece == null){
                     result.append(EMPTY);
                 } else {
-                    if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
-                        result.append(SET_TEXT_COLOR_BLACK);
-                    } else {
-                        result.append(SET_TEXT_COLOR_DARK_GREY);
-                    }
+                    result.append(SET_TEXT_COLOR_BLACK);
+//                    if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+//                        result.append(SET_TEXT_COLOR_BLACK);
+//                    } else {
+//                        result.append(SET_TEXT_COLOR_DARK_GREY);
+//                    }
                     switch(piece.getPieceType()){
                         case ChessPiece.PieceType.PAWN ->
                                 result.append(piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_PAWN: BLACK_PAWN);
@@ -106,5 +127,18 @@ public class BoardHandler {
                 .append(RESET_TEXT_COLOR)
                 .append("\n");
         return result.toString();
+    }
+
+    private boolean isPos(int r, int c, ChessPosition pos) {
+        return pos.getRow() == r + 1 && pos.getColumn() == c + 1;
+    }
+
+    private boolean isPos(int r, int c, Collection<ChessPosition> positions) {
+        for (ChessPosition pos : positions) {
+            if (pos.getRow() == r + 1 && pos.getColumn() == c + 1) {
+                return true;
+            }
+        }
+        return false;
     }
 }
