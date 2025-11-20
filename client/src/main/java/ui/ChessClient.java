@@ -38,12 +38,12 @@ public class ChessClient {
             }
             String line = scanner.nextLine();
 
-            result = eval(line);
+            result = eval(line, scanner);
             System.out.println(result);
         }
     }
 
-    public String eval(String line) {
+    public String eval(String line, Scanner scanner) {
         String[] tokens = line.toLowerCase().split(" ");
         String cmd = "help";
         String[] params = null;
@@ -73,7 +73,7 @@ public class ChessClient {
                 case "redraw" -> redraw();
                 case "leave" -> leave();
                 case "move" -> move(params);
-                case "resign" -> resign();
+                case "resign" -> resign(scanner);
                 case "highlight" -> highlight(params);
                 default -> help();
             };
@@ -133,9 +133,12 @@ public class ChessClient {
         }
     }
 
-    public String resign() {
+    public String resign(Scanner scanner) {
         try {
-            serverFacade.resign(auth.authToken(), currentGameID);
+            System.out.println("Are you sure you want to resign? (Y/N)");
+            if (scanner.nextLine().toLowerCase().charAt(0) == 'y') {
+                serverFacade.resign(auth.authToken(), currentGameID);
+            }
             return "";
         } catch (Exception e) {
             return handleErrors(e, null);

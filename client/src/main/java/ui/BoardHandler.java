@@ -28,10 +28,14 @@ public class BoardHandler {
     public void highlightBoard(ChessPosition piecePos) {
         Collection<ChessMove> validMoves = game.validMoves(piecePos);
         ArrayList<ChessPosition> highlightPositions = new ArrayList<>();
-        for (ChessMove move : validMoves) {
-            highlightPositions.add(move.getEndPosition());
+        if(game.getBoard().getPiece(piecePos) != null) {
+            for (ChessMove move : validMoves) {
+                highlightPositions.add(move.getEndPosition());
+            }
+            System.out.println(getBoardString(piecePos, highlightPositions));
+        } else {
+            System.out.println(getBoardString());
         }
-        System.out.println(getBoardString(piecePos, highlightPositions));
     }
 
     public void setColor(ChessGame.TeamColor color) {
